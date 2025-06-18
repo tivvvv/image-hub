@@ -41,4 +41,15 @@ public class ResultUtils {
         return new BusinessResponse<>(businessCodeEnum, data);
     }
 
+    /**
+     * 失败
+     *
+     * @param code
+     * @param message
+     * @return
+     */
+    public static BusinessResponse<?> error(int code, String message) {
+        return new BusinessResponse<>(code, null, message);
+    }
+
 }
