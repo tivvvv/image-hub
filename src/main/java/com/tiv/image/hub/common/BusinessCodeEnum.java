@@ -1,14 +1,14 @@
-package com.tiv.image.hub.exception;
+package com.tiv.image.hub.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * 自定义业务状态码
+ * 业务状态码枚举类
  */
 @Getter
 @AllArgsConstructor
-public enum BusinessCode {
+public enum BusinessCodeEnum {
 
     SUCCESS(0, "ok"),
     PARAMS_ERROR(40000, "请求参数错误"),

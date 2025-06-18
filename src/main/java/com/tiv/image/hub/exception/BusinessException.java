@@ -1,9 +1,10 @@
 package com.tiv.image.hub.exception;
 
+import com.tiv.image.hub.common.BusinessCodeEnum;
 import lombok.Getter;
 
 /**
- * 自定义业务异常
+ * 业务异常类
  */
 @Getter
 public class BusinessException extends RuntimeException {
@@ -18,14 +19,14 @@ public class BusinessException extends RuntimeException {
         this.code = code;
     }
 
-    public BusinessException(BusinessCode businessCode) {
-        super(businessCode.getMessage());
-        this.code = businessCode.getCode();
+    public BusinessException(BusinessCodeEnum businessCodeEnum) {
+        super(businessCodeEnum.getMessage());
+        this.code = businessCodeEnum.getCode();
     }
 
-    public BusinessException(BusinessCode businessCode, String message) {
+    public BusinessException(BusinessCodeEnum businessCodeEnum, String message) {
         super(message);
-        this.code = businessCode.getCode();
+        this.code = businessCodeEnum.getCode();
     }
 
 }
