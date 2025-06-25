@@ -1,19 +1,24 @@
 package com.tiv.image.hub.model.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Date;
-
-import lombok.Data;
 
 /**
  * 用户表
  *
  * @TableName user
  */
-@TableName(value = "user")
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@TableName(value = "user")
 public class User implements Serializable {
 
     /**
@@ -53,7 +58,7 @@ public class User implements Serializable {
     private String userProfile;
 
     /**
-     * 用户角色:user/vip/admin
+     * 用户角色:user/vip/banned/admin
      */
     @TableField(value = "user_role")
     private String userRole;
