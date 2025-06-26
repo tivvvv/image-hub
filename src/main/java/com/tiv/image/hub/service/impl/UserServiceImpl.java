@@ -1,17 +1,24 @@
 package com.tiv.image.hub.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
+import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.mapper.UserMapper;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.UserRoleEnum;
+import com.tiv.image.hub.model.vo.LoginUserVO;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ThrowUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
+import javax.servlet.http.HttpServletRequest;
+
+@Slf4j
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
@@ -27,9 +34,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public long userRegister(String userAccount, String userPassword) {
 
         // 1. 校验参数
-        ThrowUtils.throwIf(StrUtil.hasBlank(userAccount, userPassword), BusinessCodeEnum.PARAMS_ERROR, "参数为空");
-        ThrowUtils.throwIf(userAccount.length() < 4, BusinessCodeEnum.PARAMS_ERROR, "用户账号过短");
-        ThrowUtils.throwIf(userPassword.length() < 8, BusinessCodeEnum.PARAMS_ERROR, "用户密码过短");
+        validateParam(userAccount, userPassword);
 
         // 2. 检查账号重复
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
@@ -50,6 +55,67 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         boolean saveResult = this.save(user);
         ThrowUtils.throwIf(!saveResult, BusinessCodeEnum.SYSTEM_ERROR, "注册失败");
         return user.getId();
+    }
+
+    @Override
+    public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest httpServletRequest) {
+
+        // 1. 校验参数
+        validateParam(userAccount, userPassword);
+
+        // 2. 密码加密
+        String encryptedPassword = encryptPassword(userPassword);
+
+        // 3. 查询用户
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_account", userAccount);
+        queryWrapper.eq("user_password", encryptedPassword);
+        User user = this.baseMapper.selectOne(queryWrapper);
+        ThrowUtils.throwIf(user == null, BusinessCodeEnum.PARAMS_ERROR, "用户不存在或者密码错误");
+
+        // 4. 保存用户登录态
+        httpServletRequest.getSession().setAttribute(Constants.USER_LOGIN_STATE, user);
+        return getLoginUserVO(user);
+    }
+
+    @Override
+    public User getLoginUser(HttpServletRequest httpServletRequest) {
+
+        // 1. 校验用户登录态
+        Object userObj = httpServletRequest.getSession().getAttribute(Constants.USER_LOGIN_STATE);
+        ThrowUtils.throwIf(!(userObj instanceof User), BusinessCodeEnum.NOT_LOGIN_ERROR);
+
+        User currentUser = (User) userObj;
+        Long userId = currentUser.getId();
+        ThrowUtils.throwIf(userId == null, BusinessCodeEnum.NOT_LOGIN_ERROR);
+
+        // 2. 从数据库查询用户
+        currentUser = this.getById(userId);
+        ThrowUtils.throwIf(currentUser == null, BusinessCodeEnum.NOT_LOGIN_ERROR);
+
+        return currentUser;
+    }
+
+    @Override
+    public LoginUserVO getLoginUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        LoginUserVO loginUserVO = new LoginUserVO();
+        BeanUtil.copyProperties(user, loginUserVO);
+        return loginUserVO;
+    }
+
+    /**
+     * 校验参数
+     *
+     * @param userAccount
+     * @param userPassword
+     */
+    private void validateParam(String userAccount, String userPassword) {
+        ThrowUtils.throwIf(StrUtil.hasBlank(userAccount, userPassword), BusinessCodeEnum.PARAMS_ERROR, "参数为空");
+        ThrowUtils.throwIf(userAccount.length() < 4, BusinessCodeEnum.PARAMS_ERROR, "用户账号过短");
+        ThrowUtils.throwIf(userPassword.length() < 8, BusinessCodeEnum.PARAMS_ERROR, "用户密码过短");
     }
 
 }

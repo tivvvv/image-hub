@@ -8,13 +8,13 @@ import lombok.NoArgsConstructor;
 import java.io.Serializable;
 
 /**
- * 用户注册请求
+ * 用户登录请求
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRegisterRequest implements Serializable {
+public class UserLoginRequest implements Serializable {
 
     /**
      * 账号
