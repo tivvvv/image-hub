@@ -63,4 +63,16 @@ public class UserController {
         return ResultUtils.success(userService.getLoginUserVO(loginUser));
     }
 
+    /**
+     * 用户登出
+     *
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/logout")
+    public BusinessResponse<Void> userLogout(HttpServletRequest httpServletRequest) {
+        userService.userLogout(httpServletRequest);
+        return ResultUtils.success(null);
+    }
+
 }

@@ -106,6 +106,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return loginUserVO;
     }
 
+    @Override
+    public void userLogout(HttpServletRequest httpServletRequest) {
+        Object userObj = httpServletRequest.getSession().getAttribute(Constants.USER_LOGIN_STATE);
+        if (userObj == null) {
+            return;
+        }
+        httpServletRequest.getSession().removeAttribute(Constants.USER_LOGIN_STATE);
+    }
+
     /**
      * 校验参数
      *
