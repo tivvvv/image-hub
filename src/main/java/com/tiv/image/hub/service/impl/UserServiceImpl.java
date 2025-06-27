@@ -1,15 +1,18 @@
 package com.tiv.image.hub.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.mapper.UserMapper;
+import com.tiv.image.hub.model.dto.user.UserQueryRequest;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.UserRoleEnum;
 import com.tiv.image.hub.model.vo.LoginUserVO;
+import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -50,7 +56,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .userAccount(userAccount)
                 .userPassword(encryptedPassword)
                 .userName("无名")
-                .userRole(UserRoleEnum.USER.getValue())
+                .userRole(UserRoleEnum.USER.value)
                 .build();
         boolean saveResult = this.save(user);
         ThrowUtils.throwIf(!saveResult, BusinessCodeEnum.SYSTEM_ERROR, "注册失败");
@@ -104,6 +110,41 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         LoginUserVO loginUserVO = new LoginUserVO();
         BeanUtil.copyProperties(user, loginUserVO);
         return loginUserVO;
+    }
+
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtil.copyProperties(user, userVO);
+        return userVO;
+    }
+
+    @Override
+    public List<UserVO> getUserVOList(List<User> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return Collections.emptyList();
+        }
+        return userList.stream()
+                .map(this::getUserVO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
+        ThrowUtils.throwIf(userQueryRequest == null, BusinessCodeEnum.PARAMS_ERROR, "请求参数为空");
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+
+        queryWrapper.eq(userQueryRequest.getId() != null, "id", userQueryRequest.getId());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserAccount()), "userAccount", userQueryRequest.getUserAccount());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserName()), "userName", userQueryRequest.getUserName());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserProfile()), "userProfile", userQueryRequest.getUserProfile());
+        queryWrapper.eq(StrUtil.isNotBlank(userQueryRequest.getUserRole()), "userRole", userQueryRequest.getUserRole());
+        queryWrapper.orderBy(StrUtil.isNotBlank(userQueryRequest.getSortField()), "asc".equals(userQueryRequest.getSortOrder()), userQueryRequest.getSortField());
+
+        return queryWrapper;
     }
 
     @Override

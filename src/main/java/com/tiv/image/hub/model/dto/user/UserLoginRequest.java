@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto;
+package com.tiv.image.hub.model.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.vo;
+package com.tiv.image.hub.model.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,16 +6,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
- * 当前登录用户视图
+ * 用户更新请求
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginUserVO implements Serializable {
+public class UserUpdateRequest implements Serializable {
 
     /**
      * 用户id
@@ -46,16 +45,6 @@ public class LoginUserVO implements Serializable {
      * 用户角色:user/vip/banned/admin
      */
     private String userRole;
-
-    /**
-     * 创建时间
-     */
-    private Date createTime;
-
-    /**
-     * 更新时间
-     */
-    private Date updateTime;
 
     private static final long serialVersionUID = 1L;
 
