@@ -21,3 +21,29 @@ create table if not exists user
     UNIQUE INDEX unique_user_account (user_account),
     INDEX idx_user_name (user_name)
 ) comment '用户表';
+
+-- 图片表
+create table if not exists picture
+(
+    id           bigint                             not null auto_increment comment '图片id',
+    pic_name     varchar(256)                       not null comment '图片名称',
+    pic_intro    varchar(512)                       null comment '图片简介',
+    pic_url      varchar(512)                       not null comment '图片url',
+    pic_category varchar(64)                        null comment '图片分类',
+    pic_tags     varchar(512)                       null comment '图片标签(JSON)',
+    pic_size     bigint                             null comment '图片大小',
+    pic_width    int                                null comment '图片宽度',
+    pic_height   int                                null comment '图片高度',
+    pic_scale    double                             null comment '图片宽高比',
+    pic_format   varchar(32)                        null comment '图片格式',
+    user_id      bigint                             not null comment '创建用户id',
+    create_time  datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time  datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    deleted      tinyint  default 0                 not null comment '是否删除',
+    PRIMARY KEY (id),
+    INDEX idx_name (pic_name),
+    INDEX idx_intro (pic_intro),
+    INDEX idx_category (pic_category),
+    INDEX idx_tags (pic_tags),
+    INDEX idx_user_id (user_id)
+) comment '图片表';
