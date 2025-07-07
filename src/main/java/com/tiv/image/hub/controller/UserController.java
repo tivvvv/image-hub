@@ -15,7 +15,6 @@ import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ResultUtils;
 import com.tiv.image.hub.util.ThrowUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -161,7 +160,7 @@ public class UserController {
             throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR);
         }
         User user = new User();
-        BeanUtils.copyProperties(userUpdateRequest, user);
+        BeanUtil.copyProperties(userUpdateRequest, user);
         boolean result = userService.updateById(user);
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
         return ResultUtils.success(true);
