@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -19,11 +20,13 @@ public class UserLoginRequest implements Serializable {
     /**
      * 账号
      */
+    @NotBlank(message = "账号不能为空")
     private String userAccount;
 
     /**
      * 密码
      */
+    @NotBlank(message = "密码不能为空")
     private String userPassword;
 
     private static final long serialVersionUID = 1L;

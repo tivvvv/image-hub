@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -19,6 +20,7 @@ public class UserUpdateRequest implements Serializable {
     /**
      * 用户id
      */
+    @NotNull(message = "id不能为空")
     private Long id;
 
     /**

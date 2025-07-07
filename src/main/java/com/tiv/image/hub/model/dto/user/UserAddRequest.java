@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -19,6 +20,7 @@ public class UserAddRequest implements Serializable {
     /**
      * 账号
      */
+    @NotBlank(message = "账号不能为空")
     private String userAccount;
 
     /**

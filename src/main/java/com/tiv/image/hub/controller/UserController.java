@@ -7,7 +7,6 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
-import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.model.dto.user.*;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.LoginUserVO;
@@ -19,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -38,8 +38,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/register")
-    public BusinessResponse<Long> userRegister(@RequestBody UserRegisterRequest userRegisterRequest) {
-        ThrowUtils.throwIf(userRegisterRequest == null, BusinessCodeEnum.PARAMS_ERROR);
+    public BusinessResponse<Long> userRegister(@RequestBody @Valid UserRegisterRequest userRegisterRequest) {
         long userId = userService.userRegister(userRegisterRequest.getUserAccount(), userRegisterRequest.getUserPassword());
         return ResultUtils.success(userId);
     }
@@ -52,8 +51,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/login")
-    public BusinessResponse<LoginUserVO> userLogin(@RequestBody UserLoginRequest userLoginRequest, HttpServletRequest httpServletRequest) {
-        ThrowUtils.throwIf(userLoginRequest == null, BusinessCodeEnum.PARAMS_ERROR);
+    public BusinessResponse<LoginUserVO> userLogin(@RequestBody @Valid UserLoginRequest userLoginRequest, HttpServletRequest httpServletRequest) {
         LoginUserVO loginUserVO = userService.userLogin(userLoginRequest.getUserAccount(), userLoginRequest.getUserPassword(), httpServletRequest);
         return ResultUtils.success(loginUserVO);
     }
@@ -90,8 +88,7 @@ public class UserController {
      */
     @PostMapping("/add")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Long> addUser(@RequestBody UserAddRequest userAddRequest) {
-        ThrowUtils.throwIf(userAddRequest == null, BusinessCodeEnum.PARAMS_ERROR);
+    public BusinessResponse<Long> addUser(@RequestBody @Valid UserAddRequest userAddRequest) {
         User user = new User();
         BeanUtil.copyProperties(userAddRequest, user);
 
@@ -141,8 +138,7 @@ public class UserController {
      */
     @DeleteMapping()
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Boolean> deleteUser(@RequestBody DeleteRequest deleteRequest) {
-        ThrowUtils.throwIf(deleteRequest == null || deleteRequest.getId() <= 0, BusinessCodeEnum.PARAMS_ERROR);
+    public BusinessResponse<Boolean> deleteUser(@RequestBody @Valid DeleteRequest deleteRequest) {
         boolean result = userService.removeById(deleteRequest.getId());
         return ResultUtils.success(result);
     }
@@ -155,10 +151,7 @@ public class UserController {
      */
     @PostMapping("/update")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Boolean> updateUser(@RequestBody UserUpdateRequest userUpdateRequest) {
-        if (userUpdateRequest == null || userUpdateRequest.getId() == null) {
-            throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR);
-        }
+    public BusinessResponse<Boolean> updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
         User user = new User();
         BeanUtil.copyProperties(userUpdateRequest, user);
         boolean result = userService.updateById(user);
@@ -175,7 +168,6 @@ public class UserController {
     @PostMapping("/page/vo")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
     public BusinessResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
-        ThrowUtils.throwIf(userQueryRequest == null, BusinessCodeEnum.PARAMS_ERROR);
         long current = userQueryRequest.getCurrent();
         long pageSize = userQueryRequest.getPageSize();
 
