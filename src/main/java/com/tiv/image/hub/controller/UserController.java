@@ -140,7 +140,8 @@ public class UserController {
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
     public BusinessResponse<Boolean> deleteUser(@RequestBody @Valid DeleteRequest deleteRequest) {
         boolean result = userService.removeById(deleteRequest.getId());
-        return ResultUtils.success(result);
+        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+        return ResultUtils.success(true);
     }
 
     /**
@@ -160,7 +161,7 @@ public class UserController {
     }
 
     /**
-     * 管理员分页获取用户封装列表
+     * 管理员分页获取用户视图列表
      *
      * @param userQueryRequest
      * @return

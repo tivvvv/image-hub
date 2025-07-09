@@ -14,7 +14,7 @@ public class DeleteRequest implements Serializable {
     /**
      * id
      */
-    @Min(value = 1, message = "id不能小于1")
+    @Min(value = 1L, message = "id不能小于1")
     private Long id;
 
     private static final long serialVersionUID = 1L;

@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 public interface PictureService extends IService<Picture> {
 
     /**
-     * 校验图片
+     * 校验图片参数
      *
      * @param picture
      */
