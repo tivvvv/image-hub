@@ -14,6 +14,7 @@ import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
 import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.UserRoleEnum;
+import com.tiv.image.hub.model.vo.PictureTagCategory;
 import com.tiv.image.hub.model.vo.PictureVO;
 import com.tiv.image.hub.service.PictureService;
 import com.tiv.image.hub.service.UserService;
@@ -27,6 +28,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 图片controller
@@ -135,6 +138,19 @@ public class PictureController {
         boolean result = pictureService.removeById(deleteRequest.getId());
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 获取图片标签/分类列表
+     *
+     * @return
+     */
+    @GetMapping("/tagList")
+    public BusinessResponse<PictureTagCategory> listPictureTagCategory() {
+        List<String> tagList = Arrays.asList("热门", "搞笑", "生活", "高清", "艺术", "校园", "背景", "简历", "创意");
+        List<String> categoryList = Arrays.asList("模板", "电商", "表情包", "素材", "海报");
+
+        return ResultUtils.success(new PictureTagCategory(tagList, categoryList));
     }
 
     /**
