@@ -156,6 +156,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         httpServletRequest.getSession().removeAttribute(Constants.USER_LOGIN_STATE);
     }
 
+    @Override
+    public boolean isAdmin(User user) {
+        if (user == null) {
+            return false;
+        }
+        return UserRoleEnum.ADMIN.value.equals(user.getUserRole());
+    }
+
     /**
      * 校验参数
      *

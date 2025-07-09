@@ -44,7 +44,7 @@ public class PictureManager {
     public PictureUploadResult uploadPicture(MultipartFile multipartFile, String uploadPathPrefix) {
 
         // 1. 校验图片
-        validatePicture(multipartFile);
+        validateFile(multipartFile);
 
         // 2. 定义上传路径
         String uuid = RandomUtil.randomString(8);
@@ -100,11 +100,11 @@ public class PictureManager {
     }
 
     /**
-     * 校验图片
+     * 校验文件
      *
      * @param multipartFile
      */
-    private void validatePicture(MultipartFile multipartFile) {
+    private void validateFile(MultipartFile multipartFile) {
 
         // 1. 校验文件大小
         ThrowUtils.throwIf(multipartFile == null, BusinessCodeEnum.PARAMS_ERROR, "文件不能为null");

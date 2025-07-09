@@ -36,7 +36,7 @@ public class PictureVO implements Serializable {
     private String picCategory;
 
     /**
-     * 图片标签(JSON)
+     * 图片标签列表
      */
     private List<String> picTagList;
 
