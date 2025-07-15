@@ -138,10 +138,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         QueryWrapper<User> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.eq(userQueryRequest.getId() != null, "id", userQueryRequest.getId());
-        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserAccount()), "userAccount", userQueryRequest.getUserAccount());
-        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserName()), "userName", userQueryRequest.getUserName());
-        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserProfile()), "userProfile", userQueryRequest.getUserProfile());
-        queryWrapper.eq(StrUtil.isNotBlank(userQueryRequest.getUserRole()), "userRole", userQueryRequest.getUserRole());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserAccount()), "user_account", userQueryRequest.getUserAccount());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserName()), "user_name", userQueryRequest.getUserName());
+        queryWrapper.like(StrUtil.isNotBlank(userQueryRequest.getUserProfile()), "user_profile", userQueryRequest.getUserProfile());
+        queryWrapper.eq(StrUtil.isNotBlank(userQueryRequest.getUserRole()), "user_role", userQueryRequest.getUserRole());
         queryWrapper.orderBy(StrUtil.isNotBlank(userQueryRequest.getSortField()), "asc".equals(userQueryRequest.getSortOrder()), userQueryRequest.getSortField());
 
         return queryWrapper;

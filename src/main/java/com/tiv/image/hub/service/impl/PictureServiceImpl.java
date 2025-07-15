@@ -140,27 +140,27 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         QueryWrapper<Picture> queryWrapper = new QueryWrapper<>();
 
         queryWrapper.eq(pictureQueryRequest.getId() != null, "id", pictureQueryRequest.getId());
-        queryWrapper.like(StrUtil.isNotBlank(pictureQueryRequest.getPicName()), "picName", pictureQueryRequest.getPicName());
-        queryWrapper.like(StrUtil.isNotBlank(pictureQueryRequest.getPicIntro()), "picIntro", pictureQueryRequest.getPicIntro());
-        queryWrapper.eq(StrUtil.isNotBlank(pictureQueryRequest.getPicCategory()), "picCategory", pictureQueryRequest.getPicCategory());
-        queryWrapper.eq(pictureQueryRequest.getPicSize() != null, "picSize", pictureQueryRequest.getPicSize());
-        queryWrapper.eq(pictureQueryRequest.getPicWidth() != null, "picWidth", pictureQueryRequest.getPicWidth());
-        queryWrapper.eq(pictureQueryRequest.getPicHeight() != null, "picHeight", pictureQueryRequest.getPicHeight());
-        queryWrapper.eq(pictureQueryRequest.getPicScale() != null, "picScale", pictureQueryRequest.getPicScale());
-        queryWrapper.eq(StrUtil.isNotBlank(pictureQueryRequest.getPicFormat()), "picFormat", pictureQueryRequest.getPicFormat());
-        queryWrapper.eq(pictureQueryRequest.getUserId() != null, "userId", pictureQueryRequest.getUserId());
+        queryWrapper.like(StrUtil.isNotBlank(pictureQueryRequest.getPicName()), "pic_name", pictureQueryRequest.getPicName());
+        queryWrapper.like(StrUtil.isNotBlank(pictureQueryRequest.getPicIntro()), "pic_intro", pictureQueryRequest.getPicIntro());
+        queryWrapper.eq(StrUtil.isNotBlank(pictureQueryRequest.getPicCategory()), "pic_category", pictureQueryRequest.getPicCategory());
+        queryWrapper.eq(pictureQueryRequest.getPicSize() != null, "pic_size", pictureQueryRequest.getPicSize());
+        queryWrapper.eq(pictureQueryRequest.getPicWidth() != null, "pic_width", pictureQueryRequest.getPicWidth());
+        queryWrapper.eq(pictureQueryRequest.getPicHeight() != null, "pic_height", pictureQueryRequest.getPicHeight());
+        queryWrapper.eq(pictureQueryRequest.getPicScale() != null, "pic_scale", pictureQueryRequest.getPicScale());
+        queryWrapper.eq(StrUtil.isNotBlank(pictureQueryRequest.getPicFormat()), "pic_format", pictureQueryRequest.getPicFormat());
+        queryWrapper.eq(pictureQueryRequest.getUserId() != null, "user_id", pictureQueryRequest.getUserId());
         // 处理json格式的picTags
         if (CollectionUtil.isNotEmpty(pictureQueryRequest.getPicTagList())) {
             for (String tag : pictureQueryRequest.getPicTagList()) {
-                queryWrapper.like("picTags", "\"" + tag + "\"");
+                queryWrapper.like("pic_tags", "\"" + tag + "\"");
             }
         }
         // 处理关键字查询条件
         String keyword = pictureQueryRequest.getKeyword();
         if (StrUtil.isNotBlank(keyword)) {
-            queryWrapper.and(wrapper -> wrapper.like("picName", keyword)
+            queryWrapper.and(wrapper -> wrapper.like("pic_name", keyword)
                     .or()
-                    .like("picIntro", keyword)
+                    .like("pic_intro", keyword)
             );
         }
         queryWrapper.orderBy(StrUtil.isNotBlank(pictureQueryRequest.getSortField()), "asc".equals(pictureQueryRequest.getSortOrder()), pictureQueryRequest.getSortField());
