@@ -159,8 +159,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         String keyword = pictureQueryRequest.getKeyword();
         if (StrUtil.isNotBlank(keyword)) {
             queryWrapper.and(wrapper -> wrapper.like("pic_name", keyword)
-                    .or()
-                    .like("pic_intro", keyword)
+                    .or().like("pic_intro", keyword)
+                    .or().like("pic_tags", keyword)
+                    .or().like("pic_category", keyword)
             );
         }
         queryWrapper.orderBy(StrUtil.isNotBlank(pictureQueryRequest.getSortField()), "asc".equals(pictureQueryRequest.getSortOrder()), pictureQueryRequest.getSortField());
