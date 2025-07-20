@@ -14,6 +14,7 @@ import com.tiv.image.hub.model.dto.picture.PictureUpdateRequest;
 import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
 import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.User;
+import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
 import com.tiv.image.hub.model.enums.UserRoleEnum;
 import com.tiv.image.hub.model.vo.PictureTagCategory;
 import com.tiv.image.hub.model.vo.PictureVO;
@@ -106,6 +107,9 @@ public class PictureController {
     @GetMapping("/vo/{id}")
     public BusinessResponse<PictureVO> getPictureVOById(@PathVariable long id) {
         Picture picture = doGetPicture(id);
+        // 用户只能查询审核通过的图片
+        ThrowUtils.throwIf(picture.getReviewStatus() != PictureReviewStatusEnum.PASS.value,
+                BusinessCodeEnum.NOT_FOUND_ERROR);
         // 获取封装类
         return ResultUtils.success(pictureService.getPictureVO(picture));
     }
@@ -115,8 +119,10 @@ public class PictureController {
      */
     @PostMapping("/page/vo")
     public BusinessResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest) {
-        ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT, BusinessCodeEnum.PARAMS_ERROR);
-
+        ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
+                BusinessCodeEnum.PARAMS_ERROR);
+        // 用户只能查询审核通过的图片
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.value);
         Page<Picture> picturePage = doListPicture(pictureQueryRequest);
         // 获取封装类
         return ResultUtils.success(pictureService.getPictureVOPage(picturePage));

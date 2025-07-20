@@ -3,6 +3,7 @@ package com.tiv.image.hub.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -158,6 +159,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         queryWrapper.eq(pictureQueryRequest.getPicScale() != null, "pic_scale", pictureQueryRequest.getPicScale());
         queryWrapper.eq(StrUtil.isNotBlank(pictureQueryRequest.getPicFormat()), "pic_format", pictureQueryRequest.getPicFormat());
         queryWrapper.eq(pictureQueryRequest.getUserId() != null, "user_id", pictureQueryRequest.getUserId());
+        queryWrapper.eq(ObjUtil.isNotEmpty(pictureQueryRequest.getReviewStatus()), "review_status", pictureQueryRequest.getReviewStatus());
+        queryWrapper.eq(ObjUtil.isNotEmpty(pictureQueryRequest.getReviewerId()), "reviewer_id", pictureQueryRequest.getReviewerId());
         // 处理json格式的picTags
         if (CollectionUtil.isNotEmpty(pictureQueryRequest.getPicTagList())) {
             for (String tag : pictureQueryRequest.getPicTagList()) {
