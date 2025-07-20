@@ -9,6 +9,7 @@ import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
+import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
 import com.tiv.image.hub.model.dto.picture.PictureUpdateRequest;
 import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
 import com.tiv.image.hub.model.entity.Picture;
@@ -169,6 +170,21 @@ public class PictureController {
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
     public BusinessResponse<Page<Picture>> listPictureByPage(@RequestBody PictureQueryRequest pictureQueryRequest) {
         return ResultUtils.success(doListPicture(pictureQueryRequest));
+    }
+
+    /**
+     * 管理员审核图片
+     *
+     * @param pictureReviewRequest
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/review")
+    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    public BusinessResponse<Boolean> reviewPicture(@RequestBody @Valid PictureReviewRequest pictureReviewRequest, HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        pictureService.reviewPicture(pictureReviewRequest, loginUser);
+        return ResultUtils.success(true);
     }
 
     private Picture doGetPicture(long id) {

@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -73,6 +74,21 @@ public class PictureQueryRequest extends PageRequest implements Serializable {
      * 关键字
      */
     private String keyword;
+
+    /**
+     * 审核状态 0:审核中,1:通过,2:驳回
+     */
+    private Integer reviewStatus;
+
+    /**
+     * 审核人id
+     */
+    private Long reviewerId;
+
+    /**
+     * 审核时间
+     */
+    private Date reviewTime;
 
     private static final long serialVersionUID = 1L;
 

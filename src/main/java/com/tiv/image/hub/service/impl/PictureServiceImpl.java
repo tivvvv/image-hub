@@ -11,10 +11,12 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.manager.PictureManager;
 import com.tiv.image.hub.mapper.PictureMapper;
 import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
+import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
 import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
 import com.tiv.image.hub.model.dto.picture.PictureUploadResult;
 import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.User;
+import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
 import com.tiv.image.hub.model.vo.PictureVO;
 import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.PictureService;
@@ -25,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -167,6 +170,27 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         queryWrapper.orderBy(StrUtil.isNotBlank(pictureQueryRequest.getSortField()), "asc".equals(pictureQueryRequest.getSortOrder()), pictureQueryRequest.getSortField());
 
         return queryWrapper;
+    }
+
+    @Override
+    public void reviewPicture(PictureReviewRequest pictureReviewRequest, User loginUser) {
+        // 校验参数
+        Integer reviewStatusValue = pictureReviewRequest.getReviewStatus();
+        PictureReviewStatusEnum pictureReviewStatusEnum = PictureReviewStatusEnum.getEnumByValue(reviewStatusValue);
+        ThrowUtils.throwIf(pictureReviewStatusEnum == null || pictureReviewStatusEnum == PictureReviewStatusEnum.REVIEWING,
+                BusinessCodeEnum.PARAMS_ERROR, "审核状态错误");
+        // 校验图片是否存在
+        Picture picture = this.getById(pictureReviewRequest.getId());
+        ThrowUtils.throwIf(picture == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
+        // 审核状态不应重复
+        ThrowUtils.throwIf(picture.getReviewStatus() == pictureReviewStatusEnum.value, BusinessCodeEnum.PARAMS_ERROR, "重复审核");
+        // 操作数据库
+        Picture updatePicture = new Picture();
+        BeanUtil.copyProperties(pictureReviewRequest, updatePicture);
+        updatePicture.setReviewerId(loginUser.getId());
+        updatePicture.setReviewTime(new Date());
+        boolean result = this.updateById(updatePicture);
+        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR, "图片审核失败");
     }
 
 }
