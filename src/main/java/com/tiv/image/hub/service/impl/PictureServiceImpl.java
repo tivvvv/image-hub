@@ -17,6 +17,7 @@ import com.tiv.image.hub.model.dto.picture.PictureUploadResult;
 import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
+import com.tiv.image.hub.model.enums.UserRoleEnum;
 import com.tiv.image.hub.model.vo.PictureVO;
 import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.PictureService;
@@ -35,9 +36,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> implements PictureService {
-
-    @Resource
-    private PictureMapper pictureMapper;
 
     @Autowired
     private PictureManager pictureManager;
@@ -70,7 +68,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Long pictureId = pictureUploadRequest.getId();
         if (pictureId != null) {
             // 更新图片,需校验图片是否存在
-            ThrowUtils.throwIf(!this.lambdaQuery().eq(Picture::getId, pictureId).exists(), BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
+            Picture existedPicture = this.getById(pictureId);
+            ThrowUtils.throwIf(existedPicture == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
+            // 仅创建人和管理员可更新图片
+            ThrowUtils.throwIf(!loginUser.getId().equals(existedPicture.getUserId())
+                    && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
         }
 
         // 按照用户id创建目录
@@ -81,10 +83,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture picture = new Picture();
         BeanUtil.copyProperties(pictureUploadResult, picture);
         picture.setUserId(loginUser.getId());
-        // 更新库表
+
         if (pictureId != null) {
             picture.setId(pictureId);
         }
+        // 补充审核参数
+        this.fillReviewParams(picture, loginUser);
+
+        // 更新库表
         boolean result = this.saveOrUpdate(picture);
         ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存图片失败");
         return PictureVO.transferToVO(picture);
@@ -184,13 +190,28 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         ThrowUtils.throwIf(picture == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
         // 审核状态不应重复
         ThrowUtils.throwIf(picture.getReviewStatus() == pictureReviewStatusEnum.value, BusinessCodeEnum.PARAMS_ERROR, "重复审核");
-        // 操作数据库
+
         Picture updatePicture = new Picture();
         BeanUtil.copyProperties(pictureReviewRequest, updatePicture);
         updatePicture.setReviewerId(loginUser.getId());
         updatePicture.setReviewTime(new Date());
+
+        // 更新库表
         boolean result = this.updateById(updatePicture);
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR, "图片审核失败");
+    }
+
+    @Override
+    public void fillReviewParams(Picture picture, User loginUser) {
+        if (userService.isAdmin(loginUser)) {
+            // 管理员自动过审
+            picture.setReviewStatus(PictureReviewStatusEnum.PASS.value);
+            picture.setReviewMessage("管理员自动过审");
+            picture.setReviewerId(loginUser.getId());
+            picture.setReviewTime(new Date());
+        } else {
+            picture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.value);
+        }
     }
 
 }

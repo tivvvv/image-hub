@@ -57,7 +57,6 @@ public class PictureController {
      * @return
      */
     @PostMapping("/upload")
-    @AuthCheck(mustRole = "admin")
     public BusinessResponse<PictureVO> uploadPicture(@RequestPart("file") MultipartFile multipartFile,
                                                      PictureUploadRequest pictureUploadRequest,
                                                      HttpServletRequest httpServletRequest) {
@@ -91,6 +90,9 @@ public class PictureController {
 
         // 校验图片参数
         pictureService.validatePicture(picture);
+
+        // 补充审核参数
+        pictureService.fillReviewParams(picture, loginUser);
 
         // 更新库表
         boolean result = pictureService.updateById(picture);
