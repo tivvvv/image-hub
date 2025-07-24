@@ -1,5 +1,6 @@
 package com.tiv.image.hub.constant;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -16,5 +17,7 @@ public interface Constants {
     long ONE_MEGA_BYTES = 1024 * 1024;
 
     List<String> VALID_IMAGE_SUFFIXES = List.of("png", "jpg", "jpeg", "gif", "webp");
+
+    List<String> VALID_CONTENT_TYPE = Arrays.asList("image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp");
 
 }
