@@ -1,5 +1,6 @@
 package com.tiv.image.hub.controller;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -63,6 +64,21 @@ public class PictureController {
                                                      HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
         return ResultUtils.success(pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser));
+    }
+
+    /**
+     * 根据url上传图片
+     *
+     * @param pictureUploadRequest
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/upload/url")
+    public BusinessResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest, HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        String fileUrl = pictureUploadRequest.getFileUrl();
+        ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), BusinessCodeEnum.PARAMS_ERROR, "文件url不能为空");
+        return ResultUtils.success(pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser));
     }
 
     /**

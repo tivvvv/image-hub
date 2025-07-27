@@ -9,7 +9,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
+import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.upload.FilePictureUpload;
+import com.tiv.image.hub.manager.upload.UrlPictureUpload;
 import com.tiv.image.hub.mapper.PictureMapper;
 import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
 import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
@@ -24,7 +26,6 @@ import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.PictureService;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ThrowUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -38,8 +39,11 @@ import java.util.stream.Collectors;
 @Service
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> implements PictureService {
 
-    @Autowired
+    @Resource
     private FilePictureUpload filePictureUpload;
+
+    @Resource
+    private UrlPictureUpload urlPictureUpload;
 
     @Resource
     private UserService userService;
@@ -65,7 +69,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     }
 
     @Override
-    public PictureVO uploadPicture(MultipartFile multipartFile, PictureUploadRequest pictureUploadRequest, User loginUser) {
+    public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         Long pictureId = pictureUploadRequest.getId();
         if (pictureId != null) {
             // 更新图片,需校验图片是否存在
@@ -78,8 +82,16 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 
         // 按照用户id创建目录
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
+
         // 上传图片
-        PictureUploadResult pictureUploadResult = filePictureUpload.uploadPicture(multipartFile, uploadPathPrefix);
+        PictureUploadResult pictureUploadResult = null;
+        if (inputSource instanceof MultipartFile) {
+            pictureUploadResult = filePictureUpload.uploadPicture((MultipartFile) inputSource, uploadPathPrefix);
+        } else if (inputSource instanceof String) {
+            pictureUploadResult = urlPictureUpload.uploadPicture((String) inputSource, uploadPathPrefix);
+        } else {
+            throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR, "图片类型不支持");
+        }
 
         Picture picture = new Picture();
         BeanUtil.copyProperties(pictureUploadResult, picture);
