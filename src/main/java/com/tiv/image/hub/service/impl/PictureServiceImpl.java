@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
-import com.tiv.image.hub.manager.PictureManager;
+import com.tiv.image.hub.manager.upload.FilePictureUpload;
 import com.tiv.image.hub.mapper.PictureMapper;
 import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
 import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> implements PictureService {
 
     @Autowired
-    private PictureManager pictureManager;
+    private FilePictureUpload filePictureUpload;
 
     @Resource
     private UserService userService;
@@ -79,7 +79,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         // 按照用户id创建目录
         String uploadPathPrefix = String.format("public/%s", loginUser.getId());
         // 上传图片
-        PictureUploadResult pictureUploadResult = pictureManager.uploadPicture(multipartFile, uploadPathPrefix);
+        PictureUploadResult pictureUploadResult = filePictureUpload.uploadPicture(multipartFile, uploadPathPrefix);
 
         Picture picture = new Picture();
         BeanUtil.copyProperties(pictureUploadResult, picture);
