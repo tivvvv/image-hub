@@ -3,6 +3,7 @@ package com.tiv.image.hub.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -108,6 +109,11 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture picture = new Picture();
         BeanUtil.copyProperties(pictureUploadResult, picture);
         picture.setUserId(loginUser.getId());
+
+        // 优先使用指定的图片名称
+        if (StrUtil.isNotBlank(pictureUploadRequest.getPicName())) {
+            picture.setPicName(pictureUploadRequest.getPicName());
+        }
 
         if (pictureId != null) {
             picture.setId(pictureId);
@@ -258,6 +264,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "获取图片元素失败");
         }
         Elements imgElements = div.select(IMG_MIMG);
+
+        String picNamePrefix = pictureFetchRequest.getPicNamePrefix();
+        // 默认使用搜索词作为图片名称前缀
+        if (StrUtil.isBlank(picNamePrefix)) {
+            picNamePrefix = pictureFetchRequest.getSearchText();
+        }
+
+        String now = DateUtil.now();
         int uploadCount = 0;
         for (Element imgElement : imgElements) {
             String imgSrc = imgElement.attr(SRC);
@@ -271,6 +285,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             }
             PictureUploadRequest pictureUploadRequest = new PictureUploadRequest();
             pictureUploadRequest.setFileUrl(imgSrc);
+            String picName = String.format("%s_%s_%s", picNamePrefix, now, uploadCount + 1);
+            pictureUploadRequest.setPicName(picName);
             try {
                 PictureVO pictureVO = this.uploadPicture(imgSrc, pictureUploadRequest, loginUser);
                 uploadCount++;

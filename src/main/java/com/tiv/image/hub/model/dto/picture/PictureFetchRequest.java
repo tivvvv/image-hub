@@ -24,6 +24,11 @@ public class PictureFetchRequest implements Serializable {
     @Max(value = 30, message = "单次请求最多抓取30张图片")
     private int fetchSize = 20;
 
+    /**
+     * 图片名称前缀
+     */
+    private String picNamePrefix;
+
     private static final long serialVersionUID = 1L;
 
 }
