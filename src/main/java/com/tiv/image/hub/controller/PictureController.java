@@ -9,10 +9,7 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
-import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
-import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
-import com.tiv.image.hub.model.dto.picture.PictureUpdateRequest;
-import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
+import com.tiv.image.hub.model.dto.picture.*;
 import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
@@ -74,7 +71,8 @@ public class PictureController {
      * @return
      */
     @PostMapping("/upload/url")
-    public BusinessResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest,
+                                                          HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
         String fileUrl = pictureUploadRequest.getFileUrl();
         ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), BusinessCodeEnum.PARAMS_ERROR, "文件url不能为空");
@@ -89,7 +87,8 @@ public class PictureController {
      * @return
      */
     @PostMapping("/update")
-    public BusinessResponse<Boolean> updatePicture(@RequestBody @Valid PictureUpdateRequest pictureUpdateRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> updatePicture(@RequestBody @Valid PictureUpdateRequest pictureUpdateRequest,
+                                                   HttpServletRequest httpServletRequest) {
 
         // 判断图片是否存在
         long id = pictureUpdateRequest.getId();
@@ -152,7 +151,8 @@ public class PictureController {
      * @return
      */
     @DeleteMapping()
-    public BusinessResponse<Boolean> deletePicture(@RequestBody @Valid DeleteRequest deleteRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> deletePicture(@RequestBody @Valid DeleteRequest deleteRequest,
+                                                   HttpServletRequest httpServletRequest) {
         Picture picture = pictureService.getById(deleteRequest.getId());
         ThrowUtils.throwIf(picture == null, BusinessCodeEnum.NOT_FOUND_ERROR);
 
@@ -205,10 +205,26 @@ public class PictureController {
      */
     @PostMapping("/review")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Boolean> reviewPicture(@RequestBody @Valid PictureReviewRequest pictureReviewRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> reviewPicture(@RequestBody @Valid PictureReviewRequest pictureReviewRequest,
+                                                   HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
         pictureService.reviewPicture(pictureReviewRequest, loginUser);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 管理员抓取图片
+     *
+     * @param pictureFetchRequest
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/fetch")
+    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    public BusinessResponse<Integer> fetchPicture(@RequestBody @Valid PictureFetchRequest pictureFetchRequest,
+                                                  HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        return ResultUtils.success(pictureService.fetchPicture(pictureFetchRequest, loginUser));
     }
 
     private Picture doGetPicture(long id) {

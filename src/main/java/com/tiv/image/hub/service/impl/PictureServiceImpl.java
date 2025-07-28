@@ -13,10 +13,7 @@ import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.upload.FilePictureUpload;
 import com.tiv.image.hub.manager.upload.UrlPictureUpload;
 import com.tiv.image.hub.mapper.PictureMapper;
-import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
-import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
-import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
-import com.tiv.image.hub.model.dto.picture.PictureUploadResult;
+import com.tiv.image.hub.model.dto.picture.*;
 import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
@@ -26,16 +23,23 @@ import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.PictureService;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ThrowUtils;
+import lombok.extern.slf4j.Slf4j;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> implements PictureService {
 
@@ -51,6 +55,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     private static final int URL_MAX_LENGTH = 512;
 
     private static final int INTRO_MAX_LENGTH = 512;
+
+    private static final String FETCH_URL = "https://cn.bing.com/images/async?q=%s&mmasync=1";
+
+    private static final String DG_CONTROL = "dgControl";
+
+    private static final String IMG_MIMG = "img.mimg";
+
+    private static final String SRC = "src";
 
     @Override
     public void validatePicture(Picture picture) {
@@ -227,6 +239,50 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         } else {
             picture.setReviewStatus(PictureReviewStatusEnum.REVIEWING.value);
         }
+    }
+
+    @Override
+    public Integer fetchPicture(PictureFetchRequest pictureFetchRequest, User loginUser) {
+        // 抓取图片地址
+        String fetchUrl = String.format(FETCH_URL, pictureFetchRequest.getSearchText());
+        Document document = null;
+        try {
+            document = Jsoup.connect(fetchUrl).get();
+        } catch (IOException e) {
+            throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "抓取图片失败");
+        }
+
+        // 解析内容
+        Element div = document.getElementsByClass(DG_CONTROL).first();
+        if (ObjUtil.isEmpty(div)) {
+            throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "获取图片元素失败");
+        }
+        Elements imgElements = div.select(IMG_MIMG);
+        int uploadCount = 0;
+        for (Element imgElement : imgElements) {
+            String imgSrc = imgElement.attr(SRC);
+            if (StrUtil.isBlank(imgSrc)) {
+                continue;
+            }
+            // 处理图片地址
+            int index = imgSrc.indexOf('?');
+            if (index > -1) {
+                imgSrc = imgSrc.substring(0, index);
+            }
+            PictureUploadRequest pictureUploadRequest = new PictureUploadRequest();
+            pictureUploadRequest.setFileUrl(imgSrc);
+            try {
+                PictureVO pictureVO = this.uploadPicture(imgSrc, pictureUploadRequest, loginUser);
+                uploadCount++;
+                log.info("上传图片成功:{}", pictureVO);
+            } catch (Exception e) {
+                log.error("上传图片失败:{}", e.getMessage());
+            }
+            if (uploadCount >= pictureFetchRequest.getFetchSize()) {
+                break;
+            }
+        }
+        return uploadCount;
     }
 
 }

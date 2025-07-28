@@ -3,6 +3,7 @@ package com.tiv.image.hub.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.tiv.image.hub.model.dto.picture.PictureFetchRequest;
 import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
 import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
 import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
@@ -68,5 +69,14 @@ public interface PictureService extends IService<Picture> {
      * @param loginUser
      */
     void fillReviewParams(Picture picture, User loginUser);
+
+    /**
+     * 抓取图片
+     *
+     * @param pictureFetchRequest
+     * @param loginUser
+     * @return
+     */
+    Integer fetchPicture(PictureFetchRequest pictureFetchRequest, User loginUser);
 
 }
