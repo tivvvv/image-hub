@@ -1,6 +1,8 @@
 package com.tiv.image.hub.controller;
 
+import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -22,6 +24,8 @@ import com.tiv.image.hub.util.ResultUtils;
 import com.tiv.image.hub.util.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +34,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 图片controller
@@ -45,7 +50,10 @@ public class PictureController {
     @Resource
     private UserService userService;
 
-    private static final int USER_QUERY_PICTURE_LIMIT = 20;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    private static final int USER_QUERY_PICTURE_LIMIT = 30;
 
     /**
      * 上传图片
@@ -135,12 +143,48 @@ public class PictureController {
     @PostMapping("/page/vo")
     public BusinessResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest) {
         ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
-                BusinessCodeEnum.PARAMS_ERROR);
+                BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.value);
         Page<Picture> picturePage = doListPicture(pictureQueryRequest);
         // 获取封装类
         return ResultUtils.success(pictureService.getPictureVOPage(picturePage));
+    }
+
+    /**
+     * 分页获取图片视图列表(带缓存)
+     */
+    @PostMapping("/page/vo/cache")
+    public BusinessResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest) {
+        ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
+                BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
+        // 用户只能查询审核通过的图片
+        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.value);
+
+        // 查询缓存
+        String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
+        String hashKey = DigestUtil.md5Hex(queryCondition.getBytes());
+        // key格式: 项目名:方法名:md5
+        String redisKey = String.format("%s:%s:%s", Constants.PROJECT, "listPictureVOByPageWithCache", hashKey);
+
+        ValueOperations<String, String> opsForValue = stringRedisTemplate.opsForValue();
+        String cachedValue = opsForValue.get(redisKey);
+        if (StrUtil.isNotBlank(cachedValue)) {
+            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+            return ResultUtils.success(cachedPage);
+        }
+
+        // 缓存不存在,查询数据库
+        Page<Picture> picturePage = doListPicture(pictureQueryRequest);
+        // 获取封装类
+        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage);
+
+        // 写入缓存
+        // 缓存时间5-10min,避免缓存雪崩
+        int expireTime = 300 + RandomUtil.randomInt(0, 300);
+        opsForValue.set(redisKey, JSONUtil.toJsonStr(pictureVOPage), expireTime, TimeUnit.SECONDS);
+
+        return ResultUtils.success(pictureVOPage);
     }
 
     /**

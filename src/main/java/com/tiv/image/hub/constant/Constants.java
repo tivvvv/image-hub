@@ -8,6 +8,8 @@ import java.util.List;
  */
 public interface Constants {
 
+    String PROJECT = "image-hub";
+
     String USER_LOGIN_STATE = "user_login_state";
 
     String ADMIN_ROLE = "admin";
