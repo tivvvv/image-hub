@@ -1,10 +1,12 @@
 package com.tiv.image.hub.manager.upload;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.qcloud.cos.model.PutObjectResult;
+import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.config.CosClientConfig;
@@ -18,6 +20,7 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 图片上传模版
@@ -101,15 +104,44 @@ public abstract class PictureUploadTemplate<T> {
      * @return
      */
     private PictureUploadResult buildResult(PutObjectResult putObjectResult, String uploadPath, String originalFilename, File file) {
-        // 获取图片信息对象
+        List<CIObject> processedObjectList = putObjectResult.getCiUploadResult().getProcessResults().getObjectList();
+        if (CollUtil.isNotEmpty(processedObjectList)) {
+            // 压缩后的图片对象
+            CIObject compressedCiObject = processedObjectList.get(0);
+            int picWidth = compressedCiObject.getWidth();
+            int picHeight = compressedCiObject.getHeight();
+            // 计算图片宽高比
+            double picScale = NumberUtil.round((double) picWidth / picHeight, 2).doubleValue();
+            // 封装返回结果
+            return PictureUploadResult
+                    .builder()
+                    .picUrl(cosClientConfig.getHost() + "/" + compressedCiObject.getKey())
+                    .picName(FileUtil.mainName(originalFilename))
+                    .picSize(compressedCiObject.getSize().longValue())
+                    .picWidth(picWidth)
+                    .picHeight(picHeight)
+                    .picScale(picScale)
+                    .picFormat(compressedCiObject.getFormat())
+                    .build();
+        }
+
+        // 获取原始图片信息对象
         ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
         int picWidth = imageInfo.getWidth();
         int picHeight = imageInfo.getHeight();
         // 计算图片宽高比
         double picScale = NumberUtil.round((double) picWidth / picHeight, 2).doubleValue();
         // 封装返回结果
-        PictureUploadResult pictureUploadResult = PictureUploadResult.builder().picUrl(cosClientConfig.getHost() + uploadPath).picName(FileUtil.mainName(originalFilename)).picSize(FileUtil.size(file)).picWidth(picWidth).picHeight(picHeight).picScale(picScale).picFormat(imageInfo.getFormat()).build();
-        return pictureUploadResult;
+        return PictureUploadResult
+                .builder()
+                .picUrl(cosClientConfig.getHost() + uploadPath)
+                .picName(FileUtil.mainName(originalFilename))
+                .picSize(FileUtil.size(file))
+                .picWidth(picWidth)
+                .picHeight(picHeight)
+                .picScale(picScale)
+                .picFormat(imageInfo.getFormat())
+                .build();
     }
 
     /**
