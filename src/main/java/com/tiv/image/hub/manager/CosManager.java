@@ -68,24 +68,28 @@ public class CosManager {
         // 1表示返回原图信息
         picOperations.setIsPicInfo(1);
 
-        List<PicOperations.Rule> rules = new ArrayList<>();
-        // 压缩图片
-        String webpKey = FileUtil.mainName(key) + WEBP;
-        PicOperations.Rule compressRule = new PicOperations.Rule();
-        compressRule.setFileId(webpKey);
-        compressRule.setRule("imageMogr2/format/webp");
-        compressRule.setBucket(cosClientConfig.getBucket());
-        rules.add(compressRule);
+        // 对大于1MB对图片进行压缩并生成缩略图
+        if (file.length() >= 1024 * 1024) {
+            List<PicOperations.Rule> rules = new ArrayList<>();
+            // 压缩图片
+            String webpKey = FileUtil.mainName(key) + WEBP;
+            PicOperations.Rule compressRule = new PicOperations.Rule();
+            compressRule.setFileId(webpKey);
+            compressRule.setRule("imageMogr2/format/webp");
+            compressRule.setBucket(cosClientConfig.getBucket());
+            rules.add(compressRule);
 
-        // 处理缩略图
-        String thumbnailKey = FileUtil.mainName(key) + THUMBNAIL + FileUtil.getSuffix(key);
-        PicOperations.Rule thumbnailRule = new PicOperations.Rule();
-        thumbnailRule.setFileId(thumbnailKey);
-        thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 512, 512));
-        thumbnailRule.setBucket(cosClientConfig.getBucket());
-        rules.add(thumbnailRule);
+            // 处理缩略图
+            String thumbnailKey = FileUtil.mainName(key) + THUMBNAIL + FileUtil.getSuffix(key);
+            PicOperations.Rule thumbnailRule = new PicOperations.Rule();
+            thumbnailRule.setFileId(thumbnailKey);
+            thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 512, 512));
+            thumbnailRule.setBucket(cosClientConfig.getBucket());
+            rules.add(thumbnailRule);
 
-        picOperations.setRules(rules);
+            picOperations.setRules(rules);
+        }
+
         putObjectRequest.setPicOperations(picOperations);
         return cosClient.putObject(putObjectRequest);
     }
