@@ -88,6 +88,12 @@ public class Picture implements Serializable {
     private String picFormat;
 
     /**
+     * 缩略图url
+     */
+    @TableField(value = "thumbnail_url")
+    private String thumbnailUrl;
+
+    /**
      * 创建用户id
      */
     @TableField(value = "user_id")

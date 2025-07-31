@@ -112,8 +112,7 @@ public abstract class PictureUploadTemplate<T> {
             int picHeight = compressedCiObject.getHeight();
             // 计算图片宽高比
             double picScale = NumberUtil.round((double) picWidth / picHeight, 2).doubleValue();
-            // 封装返回结果
-            return PictureUploadResult
+            PictureUploadResult pictureUploadResult = PictureUploadResult
                     .builder()
                     .picUrl(cosClientConfig.getHost() + "/" + compressedCiObject.getKey())
                     .picName(FileUtil.mainName(originalFilename))
@@ -123,6 +122,13 @@ public abstract class PictureUploadTemplate<T> {
                     .picScale(picScale)
                     .picFormat(compressedCiObject.getFormat())
                     .build();
+            // 设置缩略图url
+            if (processedObjectList.size() > 1) {
+                CIObject thumbnailCiObject = processedObjectList.get(1);
+                pictureUploadResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
+            }
+            // 返回封装结果
+            return pictureUploadResult;
         }
 
         // 获取原始图片信息对象

@@ -36,6 +36,7 @@ create table if not exists picture
     pic_height     int                                null comment '图片高度',
     pic_scale      double                             null comment '图片宽高比',
     pic_format     varchar(32)                        null comment '图片格式',
+    thumbnail_url  varchar(512)                       null comment '缩略图url',
     user_id        bigint                             not null comment '创建用户id',
     review_status  int      default 0                 not null comment '审核状态 0:审核中,1:通过,2:驳回',
     review_message varchar(512)                       null comment '审核信息',

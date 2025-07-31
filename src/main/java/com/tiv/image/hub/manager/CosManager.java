@@ -29,6 +29,8 @@ public class CosManager {
 
     private static final String WEBP = ".webp";
 
+    private static final String THUMBNAIL = "_thumbnail.";
+
     /**
      * 上传对象
      *
@@ -74,6 +76,14 @@ public class CosManager {
         compressRule.setRule("imageMogr2/format/webp");
         compressRule.setBucket(cosClientConfig.getBucket());
         rules.add(compressRule);
+
+        // 处理缩略图
+        String thumbnailKey = FileUtil.mainName(key) + THUMBNAIL + FileUtil.getSuffix(key);
+        PicOperations.Rule thumbnailRule = new PicOperations.Rule();
+        thumbnailRule.setFileId(thumbnailKey);
+        thumbnailRule.setRule(String.format("imageMogr2/thumbnail/%sx%s>", 512, 512));
+        thumbnailRule.setBucket(cosClientConfig.getBucket());
+        rules.add(thumbnailRule);
 
         picOperations.setRules(rules);
         putObjectRequest.setPicOperations(picOperations);
