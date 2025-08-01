@@ -1,6 +1,5 @@
 package com.tiv.image.hub.manager.upload;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -8,6 +7,7 @@ import cn.hutool.core.util.RandomUtil;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.CIObject;
 import com.qcloud.cos.model.ciModel.persistence.ImageInfo;
+import com.qcloud.cos.model.ciModel.persistence.ProcessResults;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.config.CosClientConfig;
 import com.tiv.image.hub.exception.BusinessException;
@@ -104,8 +104,10 @@ public abstract class PictureUploadTemplate<T> {
      * @return
      */
     private PictureUploadResult buildResult(PutObjectResult putObjectResult, String uploadPath, String originalFilename, File file) {
-        List<CIObject> processedObjectList = putObjectResult.getCiUploadResult().getProcessResults().getObjectList();
-        if (CollUtil.isNotEmpty(processedObjectList)) {
+        ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
+
+        if (processResults != null) {
+            List<CIObject> processedObjectList = processResults.getObjectList();
             // 压缩后的图片对象
             CIObject compressedCiObject = processedObjectList.get(0);
             int picWidth = compressedCiObject.getWidth();

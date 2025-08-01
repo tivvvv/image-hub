@@ -8,6 +8,7 @@ import com.qcloud.cos.model.PutObjectRequest;
 import com.qcloud.cos.model.PutObjectResult;
 import com.qcloud.cos.model.ciModel.persistence.PicOperations;
 import com.tiv.image.hub.config.CosClientConfig;
+import com.tiv.image.hub.constant.Constants;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -69,7 +70,7 @@ public class CosManager {
         picOperations.setIsPicInfo(1);
 
         // 对大于1MB对图片进行压缩并生成缩略图
-        if (file.length() >= 1024 * 1024) {
+        if (Constants.cosProcessFlag && file.length() >= 1024 * 1024) {
             List<PicOperations.Rule> rules = new ArrayList<>();
             // 压缩图片
             String webpKey = FileUtil.mainName(key) + WEBP;

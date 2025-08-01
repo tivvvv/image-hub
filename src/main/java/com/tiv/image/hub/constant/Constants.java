@@ -22,4 +22,5 @@ public interface Constants {
 
     List<String> VALID_CONTENT_TYPE = Arrays.asList("image/png", "image/jpg", "image/jpeg", "image/gif", "image/webp");
 
+    boolean cosProcessFlag = false;
 }
