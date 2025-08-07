@@ -79,4 +79,11 @@ public interface PictureService extends IService<Picture> {
      */
     Integer fetchPicture(PictureFetchRequest pictureFetchRequest, User loginUser);
 
+    /**
+     * 异步清理图片文件
+     *
+     * @param picture
+     */
+    void clearPictureFile(Picture picture);
+
 }

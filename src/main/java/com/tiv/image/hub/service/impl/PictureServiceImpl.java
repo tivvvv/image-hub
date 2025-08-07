@@ -11,6 +11,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
+import com.tiv.image.hub.manager.CosManager;
 import com.tiv.image.hub.manager.upload.FilePictureUpload;
 import com.tiv.image.hub.manager.upload.UrlPictureUpload;
 import com.tiv.image.hub.mapper.PictureMapper;
@@ -29,6 +30,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,6 +54,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private CosManager cosManager;
 
     private static final int URL_MAX_LENGTH = 512;
 
@@ -299,6 +304,26 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             }
         }
         return uploadCount;
+    }
+
+    @Async
+    @Override
+    public void clearPictureFile(Picture picture) {
+        String picUrl = picture.getPicUrl();
+        // 判断图片文件是否被多条记录使用
+        Long count = this.lambdaQuery()
+                .eq(Picture::getPicUrl, picUrl)
+                .count();
+        if (count > 1) {
+            return;
+        }
+        // 删除原图
+        cosManager.deleteObject(picUrl);
+        // 删除缩略图
+        String thumbnailUrl = picture.getThumbnailUrl();
+        if (StrUtil.isNotBlank(thumbnailUrl)) {
+            cosManager.deleteObject(thumbnailUrl);
+        }
     }
 
 }

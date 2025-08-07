@@ -229,6 +229,8 @@ public class PictureController {
                 && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
         boolean result = pictureService.removeById(deleteRequest.getId());
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+        // 清理图片文件
+        pictureService.clearPictureFile(picture);
         return ResultUtils.success(true);
     }
 
