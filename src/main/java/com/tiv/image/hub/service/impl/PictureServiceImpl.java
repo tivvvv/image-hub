@@ -89,9 +89,10 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         Long pictureId = pictureUploadRequest.getId();
+        Picture existedPicture = null;
         if (pictureId != null) {
             // 更新图片,需校验图片是否存在
-            Picture existedPicture = this.getById(pictureId);
+            existedPicture = this.getById(pictureId);
             ThrowUtils.throwIf(existedPicture == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
             // 仅创建人和管理员可更新图片
             ThrowUtils.throwIf(!loginUser.getId().equals(existedPicture.getUserId())
@@ -120,8 +121,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             picture.setPicName(pictureUploadRequest.getPicName());
         }
 
-        if (pictureId != null) {
-            picture.setId(pictureId);
+        if (existedPicture != null) {
+            picture.setId(existedPicture.getId());
+            clearPictureFile(existedPicture);
         }
         // 补充审核参数
         this.fillReviewParams(picture, loginUser);
