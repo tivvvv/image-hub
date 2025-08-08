@@ -2,6 +2,9 @@ server:
   port: 8111
   servlet:
     context-path: /api
+    session:
+      cookie:
+        max-age: 2592000
 
 spring:
   servlet:
@@ -19,6 +22,9 @@ spring:
     timeout: 5000
   profiles:
     active: prod
+  session:
+    store-type: redis
+    timeout: 2592000
 
 mybatis-plus:
   configuration:
