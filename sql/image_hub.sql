@@ -38,6 +38,7 @@ create table if not exists picture
     pic_format     varchar(32)                        null comment '图片格式',
     thumbnail_url  varchar(512)                       null comment '缩略图url',
     user_id        bigint                             not null comment '创建用户id',
+    space_id       bigint                             null comment '空间id(null为公共空间)',
     review_status  int      default 0                 not null comment '审核状态 0:审核中,1:通过,2:驳回',
     review_message varchar(512)                       null comment '审核信息',
     reviewer_id    bigint                             null comment '审核人id',
@@ -51,5 +52,26 @@ create table if not exists picture
     INDEX idx_category (pic_category),
     INDEX idx_tags (pic_tags),
     INDEX idx_user_id (user_id),
+    INDEX idx_space_id (space_id),
     INDEX idx_review_status (review_status)
 ) comment '图片表';
+
+-- 空间表
+create table if not exists space
+(
+    id            bigint                             not null auto_increment comment '空间id',
+    space_name    varchar(128)                       not null comment '空间名称',
+    space_level   int      default 0                 not null comment '空间级别 0:普通版,1:专业版,2:旗舰版',
+    max_size      bigint   default 0                 not null comment '空间图片的最大容量',
+    max_count     bigint   default 0                 not null comment '空间图片的最大数量',
+    current_size  bigint   default 0                 not null comment '当前空间已使用容量',
+    current_count bigint   default 0                 not null comment '当前空间已使用数量',
+    user_id       bigint                             not null comment '创建用户id',
+    create_time   datetime default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    deleted       tinyint  default 0                 not null comment '是否删除',
+    PRIMARY KEY (id),
+    index idx_userId (user_id),
+    index idx_space_name (space_name),
+    index idx_space_level (space_level)
+) comment '空间';
