@@ -100,6 +100,12 @@ public class Picture implements Serializable {
     private Long userId;
 
     /**
+     * 空间id(null为公共空间)
+     */
+    @TableField(value = "space_id")
+    private Long spaceId;
+
+    /**
      * 审核状态 0:审核中,1:通过,2:驳回
      */
     @TableField(value = "review_status")

@@ -126,7 +126,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             clearPictureFile(existedPicture);
         }
         // 补充审核参数
-        this.fillReviewParams(picture, loginUser);
+        this.populateReviewParams(picture, loginUser);
 
         // 更新库表
         boolean result = this.saveOrUpdate(picture);
@@ -242,7 +242,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     }
 
     @Override
-    public void fillReviewParams(Picture picture, User loginUser) {
+    public void populateReviewParams(Picture picture, User loginUser) {
         if (userService.isAdmin(loginUser)) {
             // 管理员自动过审
             picture.setReviewStatus(PictureReviewStatusEnum.PASS.value);

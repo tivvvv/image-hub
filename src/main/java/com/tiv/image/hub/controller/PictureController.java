@@ -127,8 +127,8 @@ public class PictureController {
         // 校验图片参数
         pictureService.validatePicture(picture);
 
-        // 补充审核参数
-        pictureService.fillReviewParams(picture, loginUser);
+        // 填充审核参数
+        pictureService.populateReviewParams(picture, loginUser);
 
         // 更新库表
         boolean result = pictureService.updateById(picture);
