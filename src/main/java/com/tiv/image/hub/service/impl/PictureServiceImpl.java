@@ -15,8 +15,10 @@ import com.tiv.image.hub.manager.CosManager;
 import com.tiv.image.hub.manager.upload.FilePictureUpload;
 import com.tiv.image.hub.manager.upload.UrlPictureUpload;
 import com.tiv.image.hub.mapper.PictureMapper;
+import com.tiv.image.hub.mapper.SpaceMapper;
 import com.tiv.image.hub.model.dto.picture.*;
 import com.tiv.image.hub.model.entity.Picture;
+import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
 import com.tiv.image.hub.model.enums.UserRoleEnum;
@@ -58,6 +60,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     @Resource
     private CosManager cosManager;
 
+    @Resource
+    private SpaceMapper spaceMapper;
+
     private static final int URL_MAX_LENGTH = 512;
 
     private static final int INTRO_MAX_LENGTH = 512;
@@ -89,6 +94,17 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     @Override
     public PictureVO uploadPicture(Object inputSource, PictureUploadRequest pictureUploadRequest, User loginUser) {
         Long pictureId = pictureUploadRequest.getId();
+        Long spaceId = pictureUploadRequest.getSpaceId();
+
+        if (spaceId != null) {
+            // 校验空间是否存在
+            Space space = spaceMapper.selectById(spaceId);
+            ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+            // 校验空间权限,空间所有者或者管理员可以上传
+            ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId())
+                    && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
+        }
+
         Picture existedPicture = null;
         if (pictureId != null) {
             // 更新图片,需校验图片是否存在
@@ -99,8 +115,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                     && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
         }
 
-        // 按照用户id创建目录
-        String uploadPathPrefix = String.format("public/%s", loginUser.getId());
+        // 创建目录
+        String uploadPathPrefix;
+        if (spaceId == null) {
+            // 公共空间使用用户id作为目录
+            uploadPathPrefix = String.format("public/%s", loginUser.getId());
+        } else {
+            // 私有空间使用空间id作为目录
+            uploadPathPrefix = String.format("space/%s", spaceId);
+        }
 
         // 上传图片
         PictureUploadResult pictureUploadResult = null;
@@ -115,6 +138,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         Picture picture = new Picture();
         BeanUtil.copyProperties(pictureUploadResult, picture);
         picture.setUserId(loginUser.getId());
+        picture.setSpaceId(spaceId);
 
         // 优先使用指定的图片名称
         if (StrUtil.isNotBlank(pictureUploadRequest.getPicName())) {

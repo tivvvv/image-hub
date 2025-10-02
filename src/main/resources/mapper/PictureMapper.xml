@@ -18,6 +18,7 @@
         <result property="picFormat" column="pic_format" jdbcType="VARCHAR"/>
         <result property="thumbnailUrl" column="thumbnail_url" jdbcType="VARCHAR"/>
         <result property="userId" column="user_id" jdbcType="BIGINT"/>
+        <result property="spaceId" column="space_id" jdbcType="BIGINT"/>
         <result property="reviewStatus" column="review_status" jdbcType="INTEGER"/>
         <result property="reviewMessage" column="review_message" jdbcType="VARCHAR"/>
         <result property="reviewerId" column="reviewer_id" jdbcType="BIGINT"/>
@@ -32,7 +33,7 @@
         pic_url,pic_category,pic_tags,
         pic_size,pic_width,pic_height,
         pic_scale,pic_format,thumbnail_url,
-        user_id,
+        user_id,space_id
         review_status,review_message,
         reviewer_id,review_time,
         create_time,update_time,deleted
