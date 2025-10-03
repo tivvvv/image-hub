@@ -15,17 +15,17 @@ import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.model.dto.picture.*;
 import com.tiv.image.hub.model.entity.Picture;
+import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
-import com.tiv.image.hub.model.enums.UserRoleEnum;
 import com.tiv.image.hub.model.vo.PictureTagCategory;
 import com.tiv.image.hub.model.vo.PictureVO;
 import com.tiv.image.hub.service.PictureService;
+import com.tiv.image.hub.service.SpaceService;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ResultUtils;
 import com.tiv.image.hub.util.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.web.bind.annotation.*;
@@ -52,6 +52,9 @@ public class PictureController {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private SpaceService spaceService;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -109,39 +112,17 @@ public class PictureController {
     @PostMapping("/update")
     public BusinessResponse<Boolean> updatePicture(@RequestBody @Valid PictureUpdateRequest pictureUpdateRequest,
                                                    HttpServletRequest httpServletRequest) {
-
-        // 判断图片是否存在
-        long id = pictureUpdateRequest.getId();
-        Picture oldPicture = pictureService.getById(id);
-        ThrowUtils.throwIf(oldPicture == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-
         User loginUser = userService.getLoginUser(httpServletRequest);
-        // 仅创建人或管理员可更新图片
-        ThrowUtils.throwIf(!loginUser.getId().equals(oldPicture.getUserId())
-                && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
-
-        Picture picture = new Picture();
-        BeanUtils.copyProperties(pictureUpdateRequest, picture);
-        picture.setPicTags(JSONUtil.toJsonStr(pictureUpdateRequest.getPicTagList()));
-
-        // 校验图片参数
-        pictureService.validatePicture(picture);
-
-        // 填充审核参数
-        pictureService.populateReviewParams(picture, loginUser);
-
-        // 更新库表
-        boolean result = pictureService.updateById(picture);
-        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
-        return ResultUtils.success(true);
+        return ResultUtils.success(pictureService.updatePicture(pictureUpdateRequest, loginUser));
     }
 
     /**
      * 根据id获取图片视图
      */
     @GetMapping("/vo/{id}")
-    public BusinessResponse<PictureVO> getPictureVOById(@PathVariable long id) {
-        Picture picture = doGetPicture(id);
+    public BusinessResponse<PictureVO> getPictureVOById(@PathVariable long id, HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        Picture picture = doGetPicture(id, loginUser);
         // 用户只能查询审核通过的图片
         ThrowUtils.throwIf(picture.getReviewStatus() != PictureReviewStatusEnum.PASS.value,
                 BusinessCodeEnum.NOT_FOUND_ERROR);
@@ -153,12 +134,12 @@ public class PictureController {
      * 分页获取图片视图列表
      */
     @PostMapping("/page/vo")
-    public BusinessResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest) {
+    public BusinessResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest httpServletRequest) {
         ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.value);
-        Page<Picture> picturePage = doListPicture(pictureQueryRequest);
+        Page<Picture> picturePage = doListPicture(pictureQueryRequest, userService.getLoginUser(httpServletRequest));
         // 获取封装类
         return ResultUtils.success(pictureService.getPictureVOPage(picturePage));
     }
@@ -167,7 +148,7 @@ public class PictureController {
      * 分页获取图片视图列表(带缓存)
      */
     @PostMapping("/page/vo/cache")
-    public BusinessResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest) {
+    public BusinessResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest httpServletRequest) {
         ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
@@ -195,7 +176,7 @@ public class PictureController {
         }
 
         // 3. 多级缓存都未命中,查询数据库
-        Page<Picture> picturePage = doListPicture(pictureQueryRequest);
+        Page<Picture> picturePage = doListPicture(pictureQueryRequest, userService.getLoginUser(httpServletRequest));
         // 获取封装类
         Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage);
 
@@ -222,16 +203,8 @@ public class PictureController {
                                                    HttpServletRequest httpServletRequest) {
         Picture picture = pictureService.getById(deleteRequest.getId());
         ThrowUtils.throwIf(picture == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-
         User loginUser = userService.getLoginUser(httpServletRequest);
-        // 仅创建人或管理员可删除
-        ThrowUtils.throwIf(!loginUser.getId().equals(picture.getUserId())
-                && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
-        boolean result = pictureService.removeById(deleteRequest.getId());
-        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
-        // 清理图片文件
-        pictureService.clearPictureFile(picture);
-        return ResultUtils.success(true);
+        return ResultUtils.success(pictureService.deletePicture(picture, loginUser));
     }
 
     /**
@@ -252,8 +225,9 @@ public class PictureController {
      */
     @GetMapping("/{id}")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Picture> getPictureById(@PathVariable long id) {
-        return ResultUtils.success(doGetPicture(id));
+    public BusinessResponse<Picture> getPictureById(@PathVariable long id, HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        return ResultUtils.success(doGetPicture(id, loginUser));
     }
 
     /**
@@ -261,8 +235,8 @@ public class PictureController {
      */
     @PostMapping("/page")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Page<Picture>> listPictureByPage(@RequestBody PictureQueryRequest pictureQueryRequest) {
-        return ResultUtils.success(doListPicture(pictureQueryRequest));
+    public BusinessResponse<Page<Picture>> listPictureByPage(@RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest httpServletRequest) {
+        return ResultUtils.success(doListPicture(pictureQueryRequest, userService.getLoginUser(httpServletRequest)));
     }
 
     /**
@@ -296,14 +270,23 @@ public class PictureController {
         return ResultUtils.success(pictureService.fetchPicture(pictureFetchRequest, loginUser));
     }
 
-    private Picture doGetPicture(long id) {
+    private Picture doGetPicture(long id, User loginUser) {
         ThrowUtils.throwIf(id <= 0, BusinessCodeEnum.PARAMS_ERROR);
         Picture picture = pictureService.getById(id);
         ThrowUtils.throwIf(picture == null, BusinessCodeEnum.NOT_FOUND_ERROR);
+        if (picture.getSpaceId() != null) {
+            // 私有空间
+            pictureService.validatePictureAuth(picture, loginUser);
+        }
         return picture;
     }
 
-    private Page<Picture> doListPicture(PictureQueryRequest pictureQueryRequest) {
+    private Page<Picture> doListPicture(PictureQueryRequest pictureQueryRequest, User loginUser) {
+        if (pictureQueryRequest.getSpaceId() != null) {
+            Space space = spaceService.getById(pictureQueryRequest.getSpaceId());
+            ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+            ThrowUtils.throwIf(!space.getUserId().equals(loginUser.getId()), BusinessCodeEnum.NO_AUTH_ERROR, "没有空间权限");
+        }
         long current = pictureQueryRequest.getCurrent();
         long size = pictureQueryRequest.getPageSize();
 

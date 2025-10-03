@@ -6,6 +6,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -21,7 +22,6 @@ import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
-import com.tiv.image.hub.model.enums.UserRoleEnum;
 import com.tiv.image.hub.model.vo.PictureVO;
 import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.PictureService;
@@ -32,6 +32,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -100,9 +101,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             // 校验空间是否存在
             Space space = spaceMapper.selectById(spaceId);
             ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
-            // 校验空间权限,空间所有者或者管理员可以上传
-            ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId())
-                    && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
+            // 校验空间权限,仅空间所有者可以上传
+            ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId()), BusinessCodeEnum.NO_AUTH_ERROR);
         }
 
         Picture existedPicture = null;
@@ -112,7 +112,7 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             ThrowUtils.throwIf(existedPicture == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
             // 仅创建人和管理员可更新图片
             ThrowUtils.throwIf(!loginUser.getId().equals(existedPicture.getUserId())
-                    && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
+                    && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
         }
 
         // 创建目录
@@ -237,6 +237,14 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
                     .or().like("pic_category", keyword)
             );
         }
+        // 处理空间
+        if (pictureQueryRequest.getSpaceId() == null) {
+            // 只查询公共空间的图片
+            queryWrapper.isNull(true, "space_id");
+        } else {
+            // 查询指定空间
+            queryWrapper.eq("space_id", pictureQueryRequest.getSpaceId());
+        }
         queryWrapper.orderBy(StrUtil.isNotBlank(pictureQueryRequest.getSortField()), "asc".equals(pictureQueryRequest.getSortOrder()), pictureQueryRequest.getSortField());
 
         return queryWrapper;
@@ -350,6 +358,57 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         if (StrUtil.isNotBlank(thumbnailUrl)) {
             cosManager.deleteObject(thumbnailUrl);
         }
+    }
+
+    @Override
+    public void validatePictureAuth(Picture picture, User loginUser) {
+        Long spaceId = picture.getSpaceId();
+        Long userId = loginUser.getId();
+        if (spaceId == null) {
+            // 公共空间,图片创建人和管理员可操作
+            ThrowUtils.throwIf(!userId.equals(picture.getUserId())
+                    && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
+        } else {
+            // 私有空间,仅图片创建人可操作
+            ThrowUtils.throwIf(!userId.equals(picture.getUserId()), BusinessCodeEnum.NO_AUTH_ERROR);
+        }
+    }
+
+    @Override
+    public Boolean deletePicture(Picture picture, User loginUser) {
+        // 校验权限
+        validatePictureAuth(picture, loginUser);
+        boolean result = removeById(picture.getId());
+        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+        // 清理图片文件
+        clearPictureFile(picture);
+        return true;
+    }
+
+    @Override
+    public Boolean updatePicture(PictureUpdateRequest pictureUpdateRequest, User loginUser) {
+        // 判断图片是否存在
+        long id = pictureUpdateRequest.getId();
+        Picture oldPicture = getById(id);
+        ThrowUtils.throwIf(oldPicture == null, BusinessCodeEnum.NOT_FOUND_ERROR);
+
+        // 校验权限
+        validatePictureAuth(oldPicture, loginUser);
+
+        Picture picture = new Picture();
+        BeanUtils.copyProperties(pictureUpdateRequest, picture);
+        picture.setPicTags(JSONUtil.toJsonStr(pictureUpdateRequest.getPicTagList()));
+
+        // 校验图片参数
+        validatePicture(picture);
+
+        // 填充审核参数
+        populateReviewParams(picture, loginUser);
+
+        // 更新库表
+        boolean result = updateById(picture);
+        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+        return true;
     }
 
 }

@@ -12,7 +12,6 @@ import com.tiv.image.hub.model.dto.space.SpaceQueryRequest;
 import com.tiv.image.hub.model.dto.space.SpaceUpdateRequest;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
-import com.tiv.image.hub.model.enums.UserRoleEnum;
 import com.tiv.image.hub.model.vo.SpaceVO;
 import com.tiv.image.hub.service.SpaceService;
 import com.tiv.image.hub.service.UserService;
@@ -72,7 +71,7 @@ public class SpaceController {
         User loginUser = userService.getLoginUser(httpServletRequest);
         // 仅创建人或管理员可更新空间
         ThrowUtils.throwIf(!loginUser.getId().equals(oldSpace.getUserId())
-                && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
+                && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
 
         Space space = new Space();
         BeanUtils.copyProperties(spaceUpdateRequest, space);
@@ -127,7 +126,7 @@ public class SpaceController {
         User loginUser = userService.getLoginUser(httpServletRequest);
         // 仅创建人或管理员可删除
         ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId())
-                && !UserRoleEnum.ADMIN.value.equals(loginUser.getUserRole()), BusinessCodeEnum.NO_AUTH_ERROR);
+                && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
         boolean result = spaceService.removeById(deleteRequest.getId());
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
         return ResultUtils.success(true);

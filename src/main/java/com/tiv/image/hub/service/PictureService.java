@@ -3,10 +3,7 @@ package com.tiv.image.hub.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.tiv.image.hub.model.dto.picture.PictureFetchRequest;
-import com.tiv.image.hub.model.dto.picture.PictureQueryRequest;
-import com.tiv.image.hub.model.dto.picture.PictureReviewRequest;
-import com.tiv.image.hub.model.dto.picture.PictureUploadRequest;
+import com.tiv.image.hub.model.dto.picture.*;
 import com.tiv.image.hub.model.entity.Picture;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.PictureVO;
@@ -85,5 +82,31 @@ public interface PictureService extends IService<Picture> {
      * @param picture
      */
     void clearPictureFile(Picture picture);
+
+    /**
+     * 校验用户是否有指定图片权限
+     *
+     * @param picture
+     * @param loginUser
+     */
+    void validatePictureAuth(Picture picture, User loginUser);
+
+    /**
+     * 删除图片
+     *
+     * @param picture
+     * @param loginUser
+     * @return
+     */
+    Boolean deletePicture(Picture picture, User loginUser);
+
+    /**
+     * 更新图片
+     *
+     * @param pictureUpdateRequest
+     * @param loginUser
+     * @return
+     */
+    Boolean updatePicture(PictureUpdateRequest pictureUpdateRequest, User loginUser);
 
 }
