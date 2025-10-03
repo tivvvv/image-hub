@@ -8,6 +8,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
@@ -35,6 +36,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.BeanUtils;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -63,6 +65,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
 
     @Resource
     private SpaceMapper spaceMapper;
+
+    @Resource
+    private TransactionTemplate transactionTemplate;
 
     private static final int URL_MAX_LENGTH = 512;
 
@@ -103,6 +108,9 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
             ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
             // 校验空间权限,仅空间所有者可以上传
             ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId()), BusinessCodeEnum.NO_AUTH_ERROR);
+            // 校验空间容量
+            ThrowUtils.throwIf(space.getCurrentSize() >= space.getMaxSize(), BusinessCodeEnum.OPERATION_ERROR, "可用空间容量不足");
+            ThrowUtils.throwIf(space.getCurrentCount() >= space.getMaxCount(), BusinessCodeEnum.OPERATION_ERROR, "可用图片数量不足");
         }
 
         Picture existedPicture = null;
@@ -153,8 +161,23 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         this.populateReviewParams(picture, loginUser);
 
         // 更新库表
-        boolean result = this.saveOrUpdate(picture);
-        ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存图片失败");
+        long existedPictureSize = existedPicture == null ? 0 : existedPicture.getPicSize();
+        long existedPictureCount = existedPicture == null ? 0 : 1;
+
+        transactionTemplate.execute(status -> {
+            boolean result = this.saveOrUpdate(picture);
+            ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存图片失败");
+
+            // 更新空间已使用容量和数量
+            LambdaUpdateWrapper<Space> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Space::getId, spaceId)
+                    .setSql("current_size = current_size + " + (picture.getPicSize() - existedPictureSize))
+                    .setSql("current_count = current_count + " + (1 - existedPictureCount));
+            int updated = spaceMapper.update(null, updateWrapper);
+            ThrowUtils.throwIf(updated < 1, BusinessCodeEnum.SYSTEM_ERROR, "更新空间额度失败");
+            return true;
+        });
+
         return PictureVO.transferToVO(picture);
     }
 
@@ -378,8 +401,23 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
     public Boolean deletePicture(Picture picture, User loginUser) {
         // 校验权限
         validatePictureAuth(picture, loginUser);
-        boolean result = removeById(picture.getId());
-        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+
+        transactionTemplate.execute(status -> {
+            boolean result = removeById(picture.getId());
+            ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+
+            if (picture.getSpaceId() != null) {
+                // 更新空间已使用容量和数量
+                LambdaUpdateWrapper<Space> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(Space::getId, picture.getSpaceId())
+                        .setSql("current_size = current_size - " + picture.getPicSize())
+                        .setSql("current_count = current_count - 1");
+                int updated = spaceMapper.update(null, updateWrapper);
+                ThrowUtils.throwIf(updated < 1, BusinessCodeEnum.SYSTEM_ERROR, "更新空间额度失败");
+            }
+            return true;
+        });
+
         // 清理图片文件
         clearPictureFile(picture);
         return true;

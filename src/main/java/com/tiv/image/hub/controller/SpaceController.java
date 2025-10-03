@@ -12,6 +12,7 @@ import com.tiv.image.hub.model.dto.space.SpaceQueryRequest;
 import com.tiv.image.hub.model.dto.space.SpaceUpdateRequest;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
+import com.tiv.image.hub.model.enums.SpaceLevelEnum;
 import com.tiv.image.hub.model.vo.SpaceVO;
 import com.tiv.image.hub.service.SpaceService;
 import com.tiv.image.hub.service.UserService;
@@ -130,6 +131,16 @@ public class SpaceController {
         boolean result = spaceService.removeById(deleteRequest.getId());
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
         return ResultUtils.success(true);
+    }
+
+    /**
+     * 获取空间级别列表
+     *
+     * @return
+     */
+    @GetMapping("/level")
+    public BusinessResponse<SpaceLevelEnum[]> getSpaceLevel() {
+        return ResultUtils.success(SpaceLevelEnum.values());
     }
 
     /**
