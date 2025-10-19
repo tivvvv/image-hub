@@ -245,6 +245,8 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         queryWrapper.eq(pictureQueryRequest.getUserId() != null, "user_id", pictureQueryRequest.getUserId());
         queryWrapper.eq(ObjUtil.isNotEmpty(pictureQueryRequest.getReviewStatus()), "review_status", pictureQueryRequest.getReviewStatus());
         queryWrapper.eq(ObjUtil.isNotEmpty(pictureQueryRequest.getReviewerId()), "reviewer_id", pictureQueryRequest.getReviewerId());
+        queryWrapper.ge(pictureQueryRequest.getUpdateTimeStart() != null, "update_time", pictureQueryRequest.getUpdateTimeStart());
+        queryWrapper.le(pictureQueryRequest.getUpdateTimeEnd() != null, "update_time", pictureQueryRequest.getUpdateTimeEnd());
         // 处理json格式的picTags
         if (CollectionUtil.isNotEmpty(pictureQueryRequest.getPicTagList())) {
             for (String tag : pictureQueryRequest.getPicTagList()) {
