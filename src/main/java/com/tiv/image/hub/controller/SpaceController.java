@@ -13,6 +13,7 @@ import com.tiv.image.hub.model.dto.space.SpaceUpdateRequest;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.SpaceLevelEnum;
+import com.tiv.image.hub.model.vo.SpaceLevelVO;
 import com.tiv.image.hub.model.vo.SpaceVO;
 import com.tiv.image.hub.service.SpaceService;
 import com.tiv.image.hub.service.UserService;
@@ -25,6 +26,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 空间controller
@@ -139,8 +143,15 @@ public class SpaceController {
      * @return
      */
     @GetMapping("/level")
-    public BusinessResponse<SpaceLevelEnum[]> getSpaceLevel() {
-        return ResultUtils.success(SpaceLevelEnum.values());
+    public BusinessResponse<List<SpaceLevelVO>> getSpaceLevel() {
+        return ResultUtils.success(Arrays.stream(SpaceLevelEnum.values())
+                .map(spaceLevelEnum -> new SpaceLevelVO(
+                        spaceLevelEnum.getValue(),
+                        spaceLevelEnum.getDesc(),
+                        spaceLevelEnum.getBaseMaxSize(),
+                        spaceLevelEnum.getBaseMaxCount()
+                )).collect(Collectors.toList())
+        );
     }
 
     /**
