@@ -67,7 +67,7 @@ public class SpaceController {
      * @return
      */
     @PostMapping("/update")
-    public BusinessResponse<Boolean> updateSpace(@RequestBody @Valid SpaceUpdateRequest spaceUpdateRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<SpaceVO> updateSpace(@RequestBody @Valid SpaceUpdateRequest spaceUpdateRequest, HttpServletRequest httpServletRequest) {
         // 判断空间是否存在
         long id = spaceUpdateRequest.getId();
         Space oldSpace = spaceService.getById(id);
@@ -90,7 +90,7 @@ public class SpaceController {
         // 更新库表
         boolean result = spaceService.updateById(space);
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
-        return ResultUtils.success(true);
+        return getSpaceVOById(id);
     }
 
     /**
