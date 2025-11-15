@@ -167,14 +167,15 @@ public class PictureServiceImpl extends ServiceImpl<PictureMapper, Picture> impl
         transactionTemplate.execute(status -> {
             boolean result = this.saveOrUpdate(picture);
             ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存图片失败");
-
-            // 更新空间已使用容量和数量
-            LambdaUpdateWrapper<Space> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Space::getId, spaceId)
-                    .setSql("current_size = current_size + " + (picture.getPicSize() - existedPictureSize))
-                    .setSql("current_count = current_count + " + (1 - existedPictureCount));
-            int updated = spaceMapper.update(null, updateWrapper);
-            ThrowUtils.throwIf(updated < 1, BusinessCodeEnum.SYSTEM_ERROR, "更新空间额度失败");
+            if (spaceId != null) {
+                // 更新空间已使用容量和数量
+                LambdaUpdateWrapper<Space> updateWrapper = new LambdaUpdateWrapper<>();
+                updateWrapper.eq(Space::getId, spaceId)
+                        .setSql("current_size = current_size + " + (picture.getPicSize() - existedPictureSize))
+                        .setSql("current_count = current_count + " + (1 - existedPictureCount));
+                int updated = spaceMapper.update(null, updateWrapper);
+                ThrowUtils.throwIf(updated < 1, BusinessCodeEnum.SYSTEM_ERROR, "更新空间额度失败");
+            }
             return true;
         });
 
