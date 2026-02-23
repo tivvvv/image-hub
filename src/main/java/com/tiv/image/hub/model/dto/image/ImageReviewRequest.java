@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.picture;
+package com.tiv.image.hub.model.dto.image;
 
 import com.tiv.image.hub.common.PageRequest;
 import lombok.Data;
@@ -12,7 +12,7 @@ import java.io.Serializable;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PictureReviewRequest extends PageRequest implements Serializable {
+public class ImageReviewRequest extends PageRequest implements Serializable {
 
     /**
      * 图片id

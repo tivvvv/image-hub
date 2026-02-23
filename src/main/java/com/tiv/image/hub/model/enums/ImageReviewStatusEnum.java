@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
  * 图片审核状态枚举
  */
 @AllArgsConstructor
-public enum PictureReviewStatusEnum {
+public enum ImageReviewStatusEnum {
 
     REVIEWING(0, "审核中"),
     PASS(1, "通过"),
@@ -16,13 +16,13 @@ public enum PictureReviewStatusEnum {
 
     public final String desc;
 
-    public static PictureReviewStatusEnum getEnumByValue(Integer value) {
+    public static ImageReviewStatusEnum getEnumByValue(Integer value) {
         if (value == null) {
             return null;
         }
-        for (PictureReviewStatusEnum pictureReviewStatusEnum : PictureReviewStatusEnum.values()) {
-            if (pictureReviewStatusEnum.value == value) {
-                return pictureReviewStatusEnum;
+        for (ImageReviewStatusEnum imageReviewStatusEnum : ImageReviewStatusEnum.values()) {
+            if (imageReviewStatusEnum.value == value) {
+                return imageReviewStatusEnum;
             }
         }
         return null;

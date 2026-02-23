@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.picture;
+package com.tiv.image.hub.model.dto.image;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,42 +12,42 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class PictureUploadResult {
+public class ImageUploadResult {
 
     /**
      * 图片名称
      */
-    private String picName;
+    private String imageName;
 
     /**
      * 图片url
      */
-    private String picUrl;
+    private String imageUrl;
 
     /**
      * 图片大小
      */
-    private Long picSize;
+    private Long imageSize;
 
     /**
      * 图片宽度
      */
-    private int picWidth;
+    private int imageWidth;
 
     /**
      * 图片高度
      */
-    private int picHeight;
+    private int imageHeight;
 
     /**
      * 图片宽高比
      */
-    private Double picScale;
+    private Double imageScale;
 
     /**
      * 图片格式
      */
-    private String picFormat;
+    private String imageFormat;
 
     /**
      * 缩略图url

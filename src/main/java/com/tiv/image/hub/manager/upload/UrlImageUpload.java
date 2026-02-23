@@ -20,7 +20,7 @@ import java.net.URL;
  * url图片上传
  */
 @Service
-public class UrlPictureUpload extends PictureUploadTemplate<String> {
+public class UrlImageUpload extends ImageUploadTemplate<String> {
 
     @Override
     protected void validateFile(String fileUrl) {

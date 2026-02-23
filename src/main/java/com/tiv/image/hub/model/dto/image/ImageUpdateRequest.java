@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.picture;
+package com.tiv.image.hub.model.dto.image;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.util.List;
  * 图片更新请求
  */
 @Data
-public class PictureUpdateRequest implements Serializable {
+public class ImageUpdateRequest implements Serializable {
 
     /**
      * 图片id
@@ -21,22 +21,22 @@ public class PictureUpdateRequest implements Serializable {
     /**
      * 图片名称
      */
-    private String picName;
+    private String imageName;
 
     /**
      * 图片简介
      */
-    private String picIntro;
+    private String imageIntro;
 
     /**
      * 图片分类
      */
-    private String picCategory;
+    private String imageCategory;
 
     /**
      * 图片标签
      */
-    private List<String> picTagList;
+    private List<String> imageTagList;
 
     private static final long serialVersionUID = 1L;
 

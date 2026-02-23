@@ -12,7 +12,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PictureTagCategory {
+public class ImageTagCategory {
 
     /**
      * 标签列表

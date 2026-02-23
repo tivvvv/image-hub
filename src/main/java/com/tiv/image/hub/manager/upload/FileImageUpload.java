@@ -14,7 +14,7 @@ import java.io.IOException;
  * 文件图片上传
  */
 @Service
-public class FilePictureUpload extends PictureUploadTemplate<MultipartFile> {
+public class FileImageUpload extends ImageUploadTemplate<MultipartFile> {
 
     @Override
     protected void validateFile(MultipartFile multipartFile) {

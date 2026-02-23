@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.picture;
+package com.tiv.image.hub.model.dto.image;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import java.io.Serializable;
  * 图片上传请求
  */
 @Data
-public class PictureUploadRequest implements Serializable {
+public class ImageUploadRequest implements Serializable {
 
     /**
      * 图片id
@@ -23,7 +23,7 @@ public class PictureUploadRequest implements Serializable {
     /**
      * 图片名称
      */
-    private String picName;
+    private String imageName;
 
     /**
      * 空间id(null为公共空间)

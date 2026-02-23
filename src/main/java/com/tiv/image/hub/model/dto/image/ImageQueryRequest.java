@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.picture;
+package com.tiv.image.hub.model.dto.image;
 
 import com.tiv.image.hub.common.PageRequest;
 import lombok.Data;
@@ -13,7 +13,7 @@ import java.util.List;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class PictureQueryRequest extends PageRequest implements Serializable {
+public class ImageQueryRequest extends PageRequest implements Serializable {
 
     /**
      * 图片id
@@ -23,47 +23,47 @@ public class PictureQueryRequest extends PageRequest implements Serializable {
     /**
      * 图片名称
      */
-    private String picName;
+    private String imageName;
 
     /**
      * 图片简介
      */
-    private String picIntro;
+    private String imageIntro;
 
     /**
      * 图片分类
      */
-    private String picCategory;
+    private String imageCategory;
 
     /**
      * 图片标签
      */
-    private List<String> picTagList;
+    private List<String> imageTagList;
 
     /**
      * 图片大小
      */
-    private Long picSize;
+    private Long imageSize;
 
     /**
      * 图片宽度
      */
-    private Integer picWidth;
+    private Integer imageWidth;
 
     /**
      * 图片高度
      */
-    private Integer picHeight;
+    private Integer imageHeight;
 
     /**
      * 图片宽高比
      */
-    private Double picScale;
+    private Double imageScale;
 
     /**
      * 图片格式
      */
-    private String picFormat;
+    private String imageFormat;
 
     /**
      * 创建用户id

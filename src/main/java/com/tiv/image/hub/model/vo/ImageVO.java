@@ -2,7 +2,7 @@ package com.tiv.image.hub.model.vo;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
-import com.tiv.image.hub.model.entity.Picture;
+import com.tiv.image.hub.model.entity.Image;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,7 +13,7 @@ import java.util.List;
  * 图片视图
  */
 @Data
-public class PictureVO implements Serializable {
+public class ImageVO implements Serializable {
 
     /**
      * 图片id
@@ -23,52 +23,52 @@ public class PictureVO implements Serializable {
     /**
      * 图片名称
      */
-    private String picName;
+    private String imageName;
 
     /**
      * 图片简介
      */
-    private String picIntro;
+    private String imageIntro;
 
     /**
      * 图片url
      */
-    private String picUrl;
+    private String imageUrl;
 
     /**
      * 图片分类
      */
-    private String picCategory;
+    private String imageCategory;
 
     /**
      * 图片标签列表
      */
-    private List<String> picTagList;
+    private List<String> imageTagList;
 
     /**
      * 图片大小
      */
-    private Long picSize;
+    private Long imageSize;
 
     /**
      * 图片宽度
      */
-    private Integer picWidth;
+    private Integer imageWidth;
 
     /**
      * 图片高度
      */
-    private Integer picHeight;
+    private Integer imageHeight;
 
     /**
      * 图片宽高比
      */
-    private Double picScale;
+    private Double imageScale;
 
     /**
      * 图片格式
      */
-    private String picFormat;
+    private String imageFormat;
 
     /**
      * 缩略图url
@@ -105,35 +105,35 @@ public class PictureVO implements Serializable {
     /**
      * 封装类转实体类
      *
-     * @param pictureVO
+     * @param imageVO
      * @return
      */
-    public static Picture transferToObj(PictureVO pictureVO) {
-        if (pictureVO == null) {
+    public static Image transferToObj(ImageVO imageVO) {
+        if (imageVO == null) {
             return null;
         }
-        Picture picture = new Picture();
-        BeanUtil.copyProperties(pictureVO, picture);
+        Image image = new Image();
+        BeanUtil.copyProperties(imageVO, image);
         // 类型不同的字段需要额外处理
-        picture.setPicTags(JSONUtil.toJsonStr(pictureVO.getPicTagList()));
-        return picture;
+        image.setImageTags(JSONUtil.toJsonStr(imageVO.getImageTagList()));
+        return image;
     }
 
     /**
      * 实体类转封装类
      *
-     * @param picture
+     * @param image
      * @return
      */
-    public static PictureVO transferToVO(Picture picture) {
-        if (picture == null) {
+    public static ImageVO transferToVO(Image image) {
+        if (image == null) {
             return null;
         }
-        PictureVO pictureVO = new PictureVO();
-        BeanUtil.copyProperties(picture, pictureVO);
+        ImageVO imageVO = new ImageVO();
+        BeanUtil.copyProperties(image, imageVO);
         // 类型不同的字段需要额外处理
-        pictureVO.setPicTagList(JSONUtil.toList(picture.getPicTags(), String.class));
-        return pictureVO;
+        imageVO.setImageTagList(JSONUtil.toList(image.getImageTags(), String.class));
+        return imageVO;
     }
 
 }

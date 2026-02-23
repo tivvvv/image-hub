@@ -2,20 +2,20 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.tiv.image.hub.mapper.PictureMapper">
+<mapper namespace="com.tiv.image.hub.mapper.ImageMapper">
 
-    <resultMap id="BaseResultMap" type="com.tiv.image.hub.model.entity.Picture">
+    <resultMap id="BaseResultMap" type="com.tiv.image.hub.model.entity.Image">
         <id property="id" column="id" jdbcType="BIGINT"/>
-        <result property="picName" column="pic_name" jdbcType="VARCHAR"/>
-        <result property="picIntro" column="pic_intro" jdbcType="VARCHAR"/>
-        <result property="picUrl" column="pic_url" jdbcType="VARCHAR"/>
-        <result property="picCategory" column="pic_category" jdbcType="VARCHAR"/>
-        <result property="picTags" column="pic_tags" jdbcType="VARCHAR"/>
-        <result property="picSize" column="pic_size" jdbcType="BIGINT"/>
-        <result property="picWidth" column="pic_width" jdbcType="INTEGER"/>
-        <result property="picHeight" column="pic_height" jdbcType="INTEGER"/>
-        <result property="picScale" column="pic_scale" jdbcType="DOUBLE"/>
-        <result property="picFormat" column="pic_format" jdbcType="VARCHAR"/>
+        <result property="imageName" column="image_name" jdbcType="VARCHAR"/>
+        <result property="imageIntro" column="image_intro" jdbcType="VARCHAR"/>
+        <result property="imageUrl" column="image_url" jdbcType="VARCHAR"/>
+        <result property="imageCategory" column="image_category" jdbcType="VARCHAR"/>
+        <result property="imageTags" column="image_tags" jdbcType="VARCHAR"/>
+        <result property="imageSize" column="image_size" jdbcType="BIGINT"/>
+        <result property="imageWidth" column="image_width" jdbcType="INTEGER"/>
+        <result property="imageHeight" column="image_height" jdbcType="INTEGER"/>
+        <result property="imageScale" column="image_scale" jdbcType="DOUBLE"/>
+        <result property="imageFormat" column="image_format" jdbcType="VARCHAR"/>
         <result property="thumbnailUrl" column="thumbnail_url" jdbcType="VARCHAR"/>
         <result property="userId" column="user_id" jdbcType="BIGINT"/>
         <result property="spaceId" column="space_id" jdbcType="BIGINT"/>
@@ -29,10 +29,10 @@
     </resultMap>
 
     <sql id="Base_Column_List">
-        id,pic_name,pic_intro,
-        pic_url,pic_category,pic_tags,
-        pic_size,pic_width,pic_height,
-        pic_scale,pic_format,thumbnail_url,
+        id,image_name,image_intro,
+        image_url,image_category,image_tags,
+        image_size,image_width,image_height,
+        image_scale,image_format,thumbnail_url,
         user_id,space_id
         review_status,review_message,
         reviewer_id,review_time,

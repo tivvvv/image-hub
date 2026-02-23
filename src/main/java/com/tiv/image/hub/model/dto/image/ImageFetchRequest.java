@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.picture;
+package com.tiv.image.hub.model.dto.image;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.io.Serializable;
  * 图片抓取请求
  */
 @Data
-public class PictureFetchRequest implements Serializable {
+public class ImageFetchRequest implements Serializable {
 
     /**
      * 搜索词
@@ -27,7 +27,7 @@ public class PictureFetchRequest implements Serializable {
     /**
      * 图片名称前缀
      */
-    private String picNamePrefix;
+    private String imageNamePrefix;
 
     private static final long serialVersionUID = 1L;
 

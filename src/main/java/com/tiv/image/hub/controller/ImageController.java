@@ -13,14 +13,14 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
-import com.tiv.image.hub.model.dto.picture.*;
-import com.tiv.image.hub.model.entity.Picture;
+import com.tiv.image.hub.model.dto.image.*;
+import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
-import com.tiv.image.hub.model.enums.PictureReviewStatusEnum;
-import com.tiv.image.hub.model.vo.PictureTagCategory;
-import com.tiv.image.hub.model.vo.PictureVO;
-import com.tiv.image.hub.service.PictureService;
+import com.tiv.image.hub.model.enums.ImageReviewStatusEnum;
+import com.tiv.image.hub.model.vo.ImageTagCategory;
+import com.tiv.image.hub.model.vo.ImageVO;
+import com.tiv.image.hub.service.ImageService;
 import com.tiv.image.hub.service.SpaceService;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ResultUtils;
@@ -44,11 +44,11 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @RestController
-@RequestMapping("/picture")
-public class PictureController {
+@RequestMapping("/image")
+public class ImageController {
 
     @Resource
-    private PictureService pictureService;
+    private ImageService imageService;
 
     @Resource
     private UserService userService;
@@ -74,95 +74,95 @@ public class PictureController {
      * 上传图片
      *
      * @param multipartFile
-     * @param pictureUploadRequest
+     * @param imageUploadRequest
      * @param httpServletRequest
      * @return
      */
     @PostMapping("/upload")
-    public BusinessResponse<PictureVO> uploadPicture(@RequestPart("file") MultipartFile multipartFile,
-                                                     PictureUploadRequest pictureUploadRequest,
-                                                     HttpServletRequest httpServletRequest) {
+    public BusinessResponse<ImageVO> uploadImage(@RequestPart("file") MultipartFile multipartFile,
+                                                 ImageUploadRequest imageUploadRequest,
+                                                 HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
-        return ResultUtils.success(pictureService.uploadPicture(multipartFile, pictureUploadRequest, loginUser));
+        return ResultUtils.success(imageService.uploadImage(multipartFile, imageUploadRequest, loginUser));
     }
 
     /**
      * 根据url上传图片
      *
-     * @param pictureUploadRequest
+     * @param imageUploadRequest
      * @param httpServletRequest
      * @return
      */
     @PostMapping("/upload/url")
-    public BusinessResponse<PictureVO> uploadPictureByUrl(@RequestBody PictureUploadRequest pictureUploadRequest,
-                                                          HttpServletRequest httpServletRequest) {
+    public BusinessResponse<ImageVO> uploadImageByUrl(@RequestBody ImageUploadRequest imageUploadRequest,
+                                                      HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
-        String fileUrl = pictureUploadRequest.getFileUrl();
+        String fileUrl = imageUploadRequest.getFileUrl();
         ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), BusinessCodeEnum.PARAMS_ERROR, "文件url不能为空");
-        return ResultUtils.success(pictureService.uploadPicture(fileUrl, pictureUploadRequest, loginUser));
+        return ResultUtils.success(imageService.uploadImage(fileUrl, imageUploadRequest, loginUser));
     }
 
     /**
      * 更新图片
      *
-     * @param pictureUpdateRequest
+     * @param imageUpdateRequest
      * @param httpServletRequest
      * @return
      */
     @PostMapping("/update")
-    public BusinessResponse<Boolean> updatePicture(@RequestBody @Valid PictureUpdateRequest pictureUpdateRequest,
-                                                   HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> updateImage(@RequestBody @Valid ImageUpdateRequest imageUpdateRequest,
+                                                 HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
-        return ResultUtils.success(pictureService.updatePicture(pictureUpdateRequest, loginUser));
+        return ResultUtils.success(imageService.updateImage(imageUpdateRequest, loginUser));
     }
 
     /**
      * 根据id获取图片视图
      */
     @GetMapping("/vo/{id}")
-    public BusinessResponse<PictureVO> getPictureVOById(@PathVariable long id, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<ImageVO> getImageVOById(@PathVariable long id, HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
-        Picture picture = doGetPicture(id, loginUser);
+        Image image = doGetImage(id, loginUser);
         // 用户只能查询审核通过的图片
-        ThrowUtils.throwIf(picture.getReviewStatus() != PictureReviewStatusEnum.PASS.value,
+        ThrowUtils.throwIf(image.getReviewStatus() != ImageReviewStatusEnum.PASS.value,
                 BusinessCodeEnum.NOT_FOUND_ERROR);
         // 获取封装类
-        return ResultUtils.success(pictureService.getPictureVO(picture));
+        return ResultUtils.success(imageService.getImageVO(image));
     }
 
     /**
      * 分页获取图片视图列表
      */
     @PostMapping("/page/vo")
-    public BusinessResponse<Page<PictureVO>> listPictureVOByPage(@RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest httpServletRequest) {
-        ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
+    public BusinessResponse<Page<ImageVO>> listImageVOByPage(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
+        ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
-        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.value);
-        Page<Picture> picturePage = doListPicture(pictureQueryRequest, userService.getLoginUser(httpServletRequest));
+        imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
+        Page<Image> imagePage = doListImage(imageQueryRequest, userService.getLoginUser(httpServletRequest));
         // 获取封装类
-        return ResultUtils.success(pictureService.getPictureVOPage(picturePage));
+        return ResultUtils.success(imageService.getImageVOPage(imagePage));
     }
 
     /**
      * 分页获取图片视图列表(带缓存)
      */
     @PostMapping("/page/vo/cache")
-    public BusinessResponse<Page<PictureVO>> listPictureVOByPageWithCache(@RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest httpServletRequest) {
-        ThrowUtils.throwIf(pictureQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
+    public BusinessResponse<Page<ImageVO>> listImageVOByPageWithCache(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
+        ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
-        pictureQueryRequest.setReviewStatus(PictureReviewStatusEnum.PASS.value);
+        imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
 
         // 1. 查询本地缓存
-        String queryCondition = JSONUtil.toJsonStr(pictureQueryRequest);
+        String queryCondition = JSONUtil.toJsonStr(imageQueryRequest);
         String hashKey = DigestUtil.md5Hex(queryCondition.getBytes());
         // 缓存key格式: 项目名:方法名:md5
-        String cacheKey = String.format("%s:%s:%s", Constants.PROJECT, "listPictureVOByPageWithCache", hashKey);
+        String cacheKey = String.format("%s:%s:%s", Constants.PROJECT, "listImageVOByPageWithCache", hashKey);
         String cachedValue = localCache.getIfPresent(cacheKey);
         if (StrUtil.isNotBlank(cachedValue)) {
             // 1.1 本地缓存命中,直接返回结果
-            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+            Page<ImageVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
             return ResultUtils.success(cachedPage);
         }
         // 2. 本地缓存未命中,查询redis缓存
@@ -171,24 +171,24 @@ public class PictureController {
         if (StrUtil.isNotBlank(cachedValue)) {
             // 2.1 redis缓存命中,更新本地缓存
             localCache.put(cacheKey, cachedValue);
-            Page<PictureVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
+            Page<ImageVO> cachedPage = JSONUtil.toBean(cachedValue, Page.class);
             return ResultUtils.success(cachedPage);
         }
 
         // 3. 多级缓存都未命中,查询数据库
-        Page<Picture> picturePage = doListPicture(pictureQueryRequest, userService.getLoginUser(httpServletRequest));
+        Page<Image> imagePage = doListImage(imageQueryRequest, userService.getLoginUser(httpServletRequest));
         // 获取封装类
-        Page<PictureVO> pictureVOPage = pictureService.getPictureVOPage(picturePage);
+        Page<ImageVO> imageVOPage = imageService.getImageVOPage(imagePage);
 
         // 4. 更新本地缓存
-        localCache.put(cacheKey, JSONUtil.toJsonStr(pictureVOPage));
+        localCache.put(cacheKey, JSONUtil.toJsonStr(imageVOPage));
 
         // 5. 更新redis缓存
         // 缓存时间5-10min,避免缓存雪崩
         int expireTime = 300 + RandomUtil.randomInt(0, 300);
-        opsForValue.set(cacheKey, JSONUtil.toJsonStr(pictureVOPage), expireTime, TimeUnit.SECONDS);
+        opsForValue.set(cacheKey, JSONUtil.toJsonStr(imageVOPage), expireTime, TimeUnit.SECONDS);
 
-        return ResultUtils.success(pictureVOPage);
+        return ResultUtils.success(imageVOPage);
     }
 
     /**
@@ -199,12 +199,12 @@ public class PictureController {
      * @return
      */
     @DeleteMapping()
-    public BusinessResponse<Boolean> deletePicture(@RequestBody @Valid DeleteRequest deleteRequest,
-                                                   HttpServletRequest httpServletRequest) {
-        Picture picture = pictureService.getById(deleteRequest.getId());
-        ThrowUtils.throwIf(picture == null, BusinessCodeEnum.NOT_FOUND_ERROR);
+    public BusinessResponse<Boolean> deleteImage(@RequestBody @Valid DeleteRequest deleteRequest,
+                                                 HttpServletRequest httpServletRequest) {
+        Image image = imageService.getById(deleteRequest.getId());
+        ThrowUtils.throwIf(image == null, BusinessCodeEnum.NOT_FOUND_ERROR);
         User loginUser = userService.getLoginUser(httpServletRequest);
-        return ResultUtils.success(pictureService.deletePicture(picture, loginUser));
+        return ResultUtils.success(imageService.deleteImage(image, loginUser));
     }
 
     /**
@@ -213,11 +213,11 @@ public class PictureController {
      * @return
      */
     @GetMapping("/tagList")
-    public BusinessResponse<PictureTagCategory> listPictureTagCategory() {
+    public BusinessResponse<ImageTagCategory> listImageTagCategory() {
         List<String> tagList = Arrays.asList("热门", "搞笑", "生活", "高清", "艺术", "校园", "背景", "简历", "创意");
         List<String> categoryList = Arrays.asList("模板", "电商", "表情包", "素材", "海报");
 
-        return ResultUtils.success(new PictureTagCategory(tagList, categoryList));
+        return ResultUtils.success(new ImageTagCategory(tagList, categoryList));
     }
 
     /**
@@ -225,9 +225,9 @@ public class PictureController {
      */
     @GetMapping("/{id}")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Picture> getPictureById(@PathVariable long id, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Image> getImageById(@PathVariable long id, HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
-        return ResultUtils.success(doGetPicture(id, loginUser));
+        return ResultUtils.success(doGetImage(id, loginUser));
     }
 
     /**
@@ -235,63 +235,63 @@ public class PictureController {
      */
     @PostMapping("/page")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Page<Picture>> listPictureByPage(@RequestBody PictureQueryRequest pictureQueryRequest, HttpServletRequest httpServletRequest) {
-        return ResultUtils.success(doListPicture(pictureQueryRequest, userService.getLoginUser(httpServletRequest)));
+    public BusinessResponse<Page<Image>> listImageByPage(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
+        return ResultUtils.success(doListImage(imageQueryRequest, userService.getLoginUser(httpServletRequest)));
     }
 
     /**
      * 管理员审核图片
      *
-     * @param pictureReviewRequest
+     * @param imageReviewRequest
      * @param httpServletRequest
      * @return
      */
     @PostMapping("/review")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Boolean> reviewPicture(@RequestBody @Valid PictureReviewRequest pictureReviewRequest,
-                                                   HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> reviewImage(@RequestBody @Valid ImageReviewRequest imageReviewRequest,
+                                                 HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
-        pictureService.reviewPicture(pictureReviewRequest, loginUser);
+        imageService.reviewImage(imageReviewRequest, loginUser);
         return ResultUtils.success(true);
     }
 
     /**
      * 管理员抓取图片
      *
-     * @param pictureFetchRequest
+     * @param imageFetchRequest
      * @param httpServletRequest
      * @return
      */
     @PostMapping("/fetch")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Integer> fetchPicture(@RequestBody @Valid PictureFetchRequest pictureFetchRequest,
-                                                  HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Integer> fetchImage(@RequestBody @Valid ImageFetchRequest imageFetchRequest,
+                                                HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
-        return ResultUtils.success(pictureService.fetchPicture(pictureFetchRequest, loginUser));
+        return ResultUtils.success(imageService.fetchImage(imageFetchRequest, loginUser));
     }
 
-    private Picture doGetPicture(long id, User loginUser) {
+    private Image doGetImage(long id, User loginUser) {
         ThrowUtils.throwIf(id <= 0, BusinessCodeEnum.PARAMS_ERROR);
-        Picture picture = pictureService.getById(id);
-        ThrowUtils.throwIf(picture == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-        if (picture.getSpaceId() != null) {
+        Image image = imageService.getById(id);
+        ThrowUtils.throwIf(image == null, BusinessCodeEnum.NOT_FOUND_ERROR);
+        if (image.getSpaceId() != null) {
             // 私有空间
-            pictureService.validatePictureAuth(picture, loginUser);
+            imageService.validateImageAuth(image, loginUser);
         }
-        return picture;
+        return image;
     }
 
-    private Page<Picture> doListPicture(PictureQueryRequest pictureQueryRequest, User loginUser) {
-        if (pictureQueryRequest.getSpaceId() != null) {
-            Space space = spaceService.getById(pictureQueryRequest.getSpaceId());
+    private Page<Image> doListImage(ImageQueryRequest imageQueryRequest, User loginUser) {
+        if (imageQueryRequest.getSpaceId() != null) {
+            Space space = spaceService.getById(imageQueryRequest.getSpaceId());
             ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
             ThrowUtils.throwIf(!space.getUserId().equals(loginUser.getId()), BusinessCodeEnum.NO_AUTH_ERROR, "没有空间权限");
         }
-        long current = pictureQueryRequest.getCurrent();
-        long size = pictureQueryRequest.getPageSize();
+        long current = imageQueryRequest.getCurrent();
+        long size = imageQueryRequest.getPageSize();
 
-        QueryWrapper<Picture> queryWrapper = pictureService.getQueryWrapper(pictureQueryRequest);
-        return pictureService.page(new Page<>(current, size), queryWrapper);
+        QueryWrapper<Image> queryWrapper = imageService.getQueryWrapper(imageQueryRequest);
+        return imageService.page(new Page<>(current, size), queryWrapper);
     }
 
 }

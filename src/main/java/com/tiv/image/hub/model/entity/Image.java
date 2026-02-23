@@ -12,14 +12,14 @@ import java.util.Date;
 /**
  * 图片表
  *
- * @TableName picture
+ * @TableName image
  */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName(value = "picture")
-public class Picture implements Serializable {
+@TableName(value = "image")
+public class Image implements Serializable {
 
     /**
      * 图片id
@@ -30,62 +30,62 @@ public class Picture implements Serializable {
     /**
      * 图片名称
      */
-    @TableField(value = "pic_name")
-    private String picName;
+    @TableField(value = "image_name")
+    private String imageName;
 
     /**
      * 图片简介
      */
-    @TableField(value = "pic_intro")
-    private String picIntro;
+    @TableField(value = "image_intro")
+    private String imageIntro;
 
     /**
      * 图片url
      */
-    @TableField(value = "pic_url")
-    private String picUrl;
+    @TableField(value = "image_url")
+    private String imageUrl;
 
     /**
      * 图片分类
      */
-    @TableField(value = "pic_category")
-    private String picCategory;
+    @TableField(value = "image_category")
+    private String imageCategory;
 
     /**
      * 图片标签(JSON)
      */
-    @TableField(value = "pic_tags")
-    private String picTags;
+    @TableField(value = "image_tags")
+    private String imageTags;
 
     /**
      * 图片大小
      */
-    @TableField(value = "pic_size")
-    private Long picSize;
+    @TableField(value = "image_size")
+    private Long imageSize;
 
     /**
      * 图片宽度
      */
-    @TableField(value = "pic_width")
-    private Integer picWidth;
+    @TableField(value = "image_width")
+    private Integer imageWidth;
 
     /**
      * 图片高度
      */
-    @TableField(value = "pic_height")
-    private Integer picHeight;
+    @TableField(value = "image_height")
+    private Integer imageHeight;
 
     /**
      * 图片宽高比
      */
-    @TableField(value = "pic_scale")
-    private Double picScale;
+    @TableField(value = "image_scale")
+    private Double imageScale;
 
     /**
      * 图片格式
      */
-    @TableField(value = "pic_format")
-    private String picFormat;
+    @TableField(value = "image_format")
+    private String imageFormat;
 
     /**
      * 缩略图url

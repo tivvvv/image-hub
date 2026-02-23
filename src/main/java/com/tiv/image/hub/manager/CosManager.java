@@ -62,7 +62,7 @@ public class CosManager {
      * @param file
      * @return
      */
-    public PutObjectResult putPicture(String key, File file) {
+    public PutObjectResult putImage(String key, File file) {
         PutObjectRequest putObjectRequest = new PutObjectRequest(cosClientConfig.getBucket(), key, file);
         // 处理图片
         PicOperations picOperations = new PicOperations();

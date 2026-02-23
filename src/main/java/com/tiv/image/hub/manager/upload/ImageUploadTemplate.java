@@ -12,7 +12,7 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.config.CosClientConfig;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.CosManager;
-import com.tiv.image.hub.model.dto.picture.PictureUploadResult;
+import com.tiv.image.hub.model.dto.image.ImageUploadResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +27,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public abstract class PictureUploadTemplate<T> {
+public abstract class ImageUploadTemplate<T> {
 
     @Resource
     private CosClientConfig cosClientConfig;
@@ -42,7 +42,7 @@ public abstract class PictureUploadTemplate<T> {
      * @param uploadPathPrefix
      * @return
      */
-    public PictureUploadResult uploadPicture(T inputSource, String uploadPathPrefix) {
+    public ImageUploadResult uploadImage(T inputSource, String uploadPathPrefix) {
 
         // 1. 校验图片
         validateFile(inputSource);
@@ -59,11 +59,11 @@ public abstract class PictureUploadTemplate<T> {
             // 3. 处理临时文件
             processFile(inputSource, file);
             // 4. 上传文件
-            PutObjectResult putObjectResult = cosManager.putPicture(uploadPath, file);
+            PutObjectResult putObjectResult = cosManager.putImage(uploadPath, file);
             // 5. 构建返回结果
             return buildResult(putObjectResult, uploadPath, originalFilename, file);
         } catch (IOException e) {
-            log.error("picture upload error, file path = {}", uploadPath, e);
+            log.error("image upload error, file path = {}", uploadPath, e);
             throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "图片上传异常");
         } finally {
             // 6. 删除临时文件
@@ -103,52 +103,52 @@ public abstract class PictureUploadTemplate<T> {
      * @param file
      * @return
      */
-    private PictureUploadResult buildResult(PutObjectResult putObjectResult, String uploadPath, String originalFilename, File file) {
+    private ImageUploadResult buildResult(PutObjectResult putObjectResult, String uploadPath, String originalFilename, File file) {
         ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
 
         if (processResults != null) {
             List<CIObject> processedObjectList = processResults.getObjectList();
             // 压缩后的图片对象
             CIObject compressedCiObject = processedObjectList.get(0);
-            int picWidth = compressedCiObject.getWidth();
-            int picHeight = compressedCiObject.getHeight();
+            int imageWidth = compressedCiObject.getWidth();
+            int imageHeight = compressedCiObject.getHeight();
             // 计算图片宽高比
-            double picScale = NumberUtil.round((double) picWidth / picHeight, 2).doubleValue();
-            PictureUploadResult pictureUploadResult = PictureUploadResult
+            double imageScale = NumberUtil.round((double) imageWidth / imageHeight, 2).doubleValue();
+            ImageUploadResult imageUploadResult = ImageUploadResult
                     .builder()
-                    .picUrl(cosClientConfig.getHost() + "/" + compressedCiObject.getKey())
-                    .picName(FileUtil.mainName(originalFilename))
-                    .picSize(compressedCiObject.getSize().longValue())
-                    .picWidth(picWidth)
-                    .picHeight(picHeight)
-                    .picScale(picScale)
-                    .picFormat(compressedCiObject.getFormat())
+                    .imageUrl(cosClientConfig.getHost() + "/" + compressedCiObject.getKey())
+                    .imageName(FileUtil.mainName(originalFilename))
+                    .imageSize(compressedCiObject.getSize().longValue())
+                    .imageWidth(imageWidth)
+                    .imageHeight(imageHeight)
+                    .imageScale(imageScale)
+                    .imageFormat(compressedCiObject.getFormat())
                     .build();
             // 设置缩略图url
             if (processedObjectList.size() > 1) {
                 CIObject thumbnailCiObject = processedObjectList.get(1);
-                pictureUploadResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
+                imageUploadResult.setThumbnailUrl(cosClientConfig.getHost() + "/" + thumbnailCiObject.getKey());
             }
             // 返回封装结果
-            return pictureUploadResult;
+            return imageUploadResult;
         }
 
         // 获取原始图片信息对象
         ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
-        int picWidth = imageInfo.getWidth();
-        int picHeight = imageInfo.getHeight();
+        int imageWidth = imageInfo.getWidth();
+        int imageHeight = imageInfo.getHeight();
         // 计算图片宽高比
-        double picScale = NumberUtil.round((double) picWidth / picHeight, 2).doubleValue();
+        double imageScale = NumberUtil.round((double) imageWidth / imageHeight, 2).doubleValue();
         // 封装返回结果
-        return PictureUploadResult
+        return ImageUploadResult
                 .builder()
-                .picUrl(cosClientConfig.getHost() + uploadPath)
-                .picName(FileUtil.mainName(originalFilename))
-                .picSize(FileUtil.size(file))
-                .picWidth(picWidth)
-                .picHeight(picHeight)
-                .picScale(picScale)
-                .picFormat(imageInfo.getFormat())
+                .imageUrl(cosClientConfig.getHost() + uploadPath)
+                .imageName(FileUtil.mainName(originalFilename))
+                .imageSize(FileUtil.size(file))
+                .imageWidth(imageWidth)
+                .imageHeight(imageHeight)
+                .imageScale(imageScale)
+                .imageFormat(imageInfo.getFormat())
                 .build();
     }
 

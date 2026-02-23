@@ -23,19 +23,19 @@ create table if not exists user
 ) comment '用户表';
 
 -- 图片表
-create table if not exists picture
+create table if not exists image
 (
     id             bigint                             not null auto_increment comment '图片id',
-    pic_name       varchar(256)                       not null comment '图片名称',
-    pic_intro      varchar(512)                       null comment '图片简介',
-    pic_url        varchar(512)                       not null comment '图片url',
-    pic_category   varchar(64)                        null comment '图片分类',
-    pic_tags       varchar(512)                       null comment '图片标签(JSON)',
-    pic_size       bigint                             null comment '图片大小',
-    pic_width      int                                null comment '图片宽度',
-    pic_height     int                                null comment '图片高度',
-    pic_scale      double                             null comment '图片宽高比',
-    pic_format     varchar(32)                        null comment '图片格式',
+    image_name     varchar(256)                       not null comment '图片名称',
+    image_intro    varchar(512)                       null comment '图片简介',
+    image_url      varchar(512)                       not null comment '图片url',
+    image_category varchar(64)                        null comment '图片分类',
+    image_tags     varchar(512)                       null comment '图片标签(JSON)',
+    image_size     bigint                             null comment '图片大小',
+    image_width    int                                null comment '图片宽度',
+    image_height   int                                null comment '图片高度',
+    image_scale    double                             null comment '图片宽高比',
+    image_format   varchar(32)                        null comment '图片格式',
     thumbnail_url  varchar(512)                       null comment '缩略图url',
     user_id        bigint                             not null comment '创建用户id',
     space_id       bigint                             null comment '空间id(null为公共空间)',
@@ -47,10 +47,10 @@ create table if not exists picture
     update_time    datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     deleted        tinyint  default 0                 not null comment '是否删除',
     PRIMARY KEY (id),
-    INDEX idx_name (pic_name),
-    INDEX idx_intro (pic_intro),
-    INDEX idx_category (pic_category),
-    INDEX idx_tags (pic_tags),
+    INDEX idx_name (image_name),
+    INDEX idx_intro (image_intro),
+    INDEX idx_category (image_category),
+    INDEX idx_tags (image_tags),
     INDEX idx_user_id (user_id),
     INDEX idx_space_id (space_id),
     INDEX idx_review_status (review_status)
