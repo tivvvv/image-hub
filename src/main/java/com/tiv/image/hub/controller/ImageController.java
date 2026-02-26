@@ -13,7 +13,7 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
-import com.tiv.image.hub.model.dto.image.*;
+import com.tiv.image.hub.model.dto.image.request.*;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;

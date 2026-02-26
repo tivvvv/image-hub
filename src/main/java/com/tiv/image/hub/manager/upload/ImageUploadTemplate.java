@@ -12,7 +12,7 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.config.CosClientConfig;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.CosManager;
-import com.tiv.image.hub.model.dto.image.ImageUploadResult;
+import com.tiv.image.hub.model.dto.image.result.ImageUploadResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -105,6 +105,8 @@ public abstract class ImageUploadTemplate<T> {
      */
     private ImageUploadResult buildResult(PutObjectResult putObjectResult, String uploadPath, String originalFilename, File file) {
         ProcessResults processResults = putObjectResult.getCiUploadResult().getProcessResults();
+        // 原始图片信息对象
+        ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
 
         if (processResults != null) {
             List<CIObject> processedObjectList = processResults.getObjectList();
@@ -123,6 +125,7 @@ public abstract class ImageUploadTemplate<T> {
                     .imageHeight(imageHeight)
                     .imageScale(imageScale)
                     .imageFormat(compressedCiObject.getFormat())
+                    .imageColor(imageInfo.getAve())
                     .build();
             // 设置缩略图url
             if (processedObjectList.size() > 1) {
@@ -133,8 +136,6 @@ public abstract class ImageUploadTemplate<T> {
             return imageUploadResult;
         }
 
-        // 获取原始图片信息对象
-        ImageInfo imageInfo = putObjectResult.getCiUploadResult().getOriginalInfo().getImageInfo();
         int imageWidth = imageInfo.getWidth();
         int imageHeight = imageInfo.getHeight();
         // 计算图片宽高比
@@ -149,6 +150,7 @@ public abstract class ImageUploadTemplate<T> {
                 .imageHeight(imageHeight)
                 .imageScale(imageScale)
                 .imageFormat(imageInfo.getFormat())
+                .imageColor(imageInfo.getAve())
                 .build();
     }
 

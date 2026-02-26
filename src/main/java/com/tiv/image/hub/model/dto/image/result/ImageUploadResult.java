@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.image;
+package com.tiv.image.hub.model.dto.image.result;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -48,6 +48,11 @@ public class ImageUploadResult {
      * 图片格式
      */
     private String imageFormat;
+
+    /**
+     * 图片主色调
+     */
+    private String imageColor;
 
     /**
      * 缩略图url

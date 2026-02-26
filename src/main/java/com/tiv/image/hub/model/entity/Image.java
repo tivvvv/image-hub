@@ -88,6 +88,12 @@ public class Image implements Serializable {
     private String imageFormat;
 
     /**
+     * 图片主色调 格式:0xRRGGBB
+     */
+    @TableField(value = "image_color")
+    private String imageColor;
+
+    /**
      * 缩略图url
      */
     @TableField(value = "thumbnail_url")

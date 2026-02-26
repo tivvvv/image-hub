@@ -71,6 +71,11 @@ public class ImageVO implements Serializable {
     private String imageFormat;
 
     /**
+     * 图片主色调
+     */
+    private String imageColor;
+
+    /**
      * 缩略图url
      */
     private String thumbnailUrl;

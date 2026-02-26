@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.image;
+package com.tiv.image.hub.model.dto.image.request;
 
 import com.tiv.image.hub.common.PageRequest;
 import lombok.Data;

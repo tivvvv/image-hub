@@ -36,6 +36,7 @@ create table if not exists image
     image_height   int                                null comment '图片高度',
     image_scale    double                             null comment '图片宽高比',
     image_format   varchar(32)                        null comment '图片格式',
+    image_color    varchar(16)                        null comment '图片主色调',
     thumbnail_url  varchar(512)                       null comment '缩略图url',
     user_id        bigint                             not null comment '创建用户id',
     space_id       bigint                             null comment '空间id(null为公共空间)',
