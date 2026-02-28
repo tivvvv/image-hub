@@ -13,6 +13,7 @@ import com.tiv.image.hub.config.CosClientConfig;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.CosManager;
 import com.tiv.image.hub.model.dto.image.result.ImageUploadResult;
+import com.tiv.image.hub.util.ColorFormatUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -125,7 +126,7 @@ public abstract class ImageUploadTemplate<T> {
                     .imageHeight(imageHeight)
                     .imageScale(imageScale)
                     .imageFormat(compressedCiObject.getFormat())
-                    .imageColor(imageInfo.getAve())
+                    .imageColor(ColorFormatUtils.toTripletFormat(imageInfo.getAve()))
                     .build();
             // 设置缩略图url
             if (processedObjectList.size() > 1) {
@@ -150,7 +151,7 @@ public abstract class ImageUploadTemplate<T> {
                 .imageHeight(imageHeight)
                 .imageScale(imageScale)
                 .imageFormat(imageInfo.getFormat())
-                .imageColor(imageInfo.getAve())
+                .imageColor(ColorFormatUtils.toTripletFormat(imageInfo.getAve()))
                 .build();
     }
 
