@@ -1,5 +1,6 @@
 package com.tiv.image.hub.controller;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -23,6 +24,7 @@ import com.tiv.image.hub.model.vo.ImageVO;
 import com.tiv.image.hub.service.ImageService;
 import com.tiv.image.hub.service.SpaceService;
 import com.tiv.image.hub.service.UserService;
+import com.tiv.image.hub.util.ColorSimilarUtils;
 import com.tiv.image.hub.util.ResultUtils;
 import com.tiv.image.hub.util.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +36,14 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.awt.*;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * 图片controller
@@ -291,6 +297,37 @@ public class ImageController {
         long size = imageQueryRequest.getPageSize();
 
         QueryWrapper<Image> queryWrapper = imageService.getQueryWrapper(imageQueryRequest);
+
+        String imageColor = imageQueryRequest.getImageColor();
+        if (imageColor != null) {
+            // 走按颜色搜索逻辑,内存分页
+            queryWrapper.isNotNull("image_color");
+            List<Image> imageList = imageService.list(queryWrapper);
+            if (CollUtil.isEmpty(imageList)) {
+                return new Page<>(current, size, 0);
+            }
+            // 色调字符串转换为 Color 对象
+            Color targetColor = Color.decode(imageColor);
+            // 按颜色相似度排序
+            List<Image> sortedImageList = imageList.stream()
+                    .sorted(Comparator.<Image>comparingDouble(image -> {
+                        Color color = Color.decode(image.getImageColor());
+                        return ColorSimilarUtils.calculateSimilarity(color, targetColor);
+                    }).reversed()).collect(Collectors.toList());
+
+            // 手动分页
+            int total = sortedImageList.size();
+            int start = (int) ((current - 1) * size);
+            int end = (int) Math.min(start + size, total);
+            if (start >= total) {
+                Page<Image> emptyPage = new Page<>(current, size, total);
+                emptyPage.setRecords(new ArrayList<>());
+                return emptyPage;
+            }
+            Page<Image> resultPage = new Page<>(current, size, total);
+            resultPage.setRecords(sortedImageList.subList(start, end));
+            return resultPage;
+        }
         return imageService.page(new Page<>(current, size), queryWrapper);
     }
 

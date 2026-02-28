@@ -66,6 +66,11 @@ public class ImageQueryRequest extends PageRequest implements Serializable {
     private String imageFormat;
 
     /**
+     * 图片主色调
+     */
+    private String imageColor;
+
+    /**
      * 创建用户id
      */
     private Long userId;
