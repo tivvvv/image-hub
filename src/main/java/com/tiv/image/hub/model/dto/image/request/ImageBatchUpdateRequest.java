@@ -35,6 +35,11 @@ public class ImageBatchUpdateRequest implements Serializable {
      */
     private List<String> imageTagList;
 
+    /**
+     * 图片名称模板
+     */
+    private String nameTemplate;
+
     private static final long serialVersionUID = 1L;
 
 }

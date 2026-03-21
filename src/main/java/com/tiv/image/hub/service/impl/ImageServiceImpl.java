@@ -480,11 +480,32 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
                 image.setImageTags(JSONUtil.toJsonStr(imageTagList));
             }
         });
+
+        // 4. 根据名称模板批量修改图片名称
+        updateImageNameByTemplate(imageList, imageBatchUpdateRequest.getNameTemplate());
+
         return transactionTemplate.execute(status -> {
             boolean result = this.updateBatchById(imageList);
             ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
             return true;
         });
+    }
+
+    /**
+     * 根据名称模板批量修改图片名称
+     *
+     * @param imageList
+     * @param nameTemplate
+     */
+    private void updateImageNameByTemplate(List<Image> imageList, String nameTemplate) {
+        if (CollUtil.isEmpty(imageList) || StrUtil.isBlank(nameTemplate) || !nameTemplate.contains("{序号}")) {
+            return;
+        }
+        long num = 1;
+        for (Image image : imageList) {
+            String imageName = nameTemplate.replaceAll("\\{序号}", String.valueOf(num++));
+            image.setImageName(imageName);
+        }
     }
 
 }

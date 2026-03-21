@@ -74,7 +74,7 @@ public class ImageController {
             .expireAfterWrite(Duration.ofMinutes(5))
             .build();
 
-    private static final int USER_QUERY_PICTURE_LIMIT = 30;
+    private static final int USER_QUERY_IMAGE_LIMIT = 30;
 
     /**
      * 上传图片
@@ -155,7 +155,7 @@ public class ImageController {
      */
     @PostMapping("/page/vo")
     public BusinessResponse<Page<ImageVO>> listImageVOByPage(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
-        ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
+        ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_IMAGE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
@@ -169,7 +169,7 @@ public class ImageController {
      */
     @PostMapping("/page/vo/cache")
     public BusinessResponse<Page<ImageVO>> listImageVOByPageWithCache(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
-        ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_PICTURE_LIMIT,
+        ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_IMAGE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
