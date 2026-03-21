@@ -109,4 +109,12 @@ public interface ImageService extends IService<Image> {
      */
     Boolean updateImage(ImageUpdateRequest imageUpdateRequest, User loginUser);
 
+    /**
+     * 批量更新图片
+     *
+     * @param imageBatchUpdateRequest
+     * @param loginUser
+     * @return
+     */
+    Boolean batchUpdateImage(ImageBatchUpdateRequest imageBatchUpdateRequest, User loginUser);
 }

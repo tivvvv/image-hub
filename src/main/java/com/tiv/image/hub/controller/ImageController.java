@@ -123,6 +123,20 @@ public class ImageController {
     }
 
     /**
+     * 批量更新图片
+     *
+     * @param imageBatchUpdateRequest
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/update/batch")
+    public BusinessResponse<Boolean> batchUpdateImage(@RequestBody @Valid ImageBatchUpdateRequest imageBatchUpdateRequest,
+                                                      HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        return ResultUtils.success(imageService.batchUpdateImage(imageBatchUpdateRequest, loginUser));
+    }
+
+    /**
      * 根据id获取图片视图
      */
     @GetMapping("/vo/{id}")

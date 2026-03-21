@@ -453,4 +453,38 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         return true;
     }
 
+    @Override
+    public Boolean batchUpdateImage(ImageBatchUpdateRequest imageBatchUpdateRequest, User loginUser) {
+        // 1. 校验空间权限
+        Long spaceId = imageBatchUpdateRequest.getSpaceId();
+        Space space = spaceMapper.selectById(spaceId);
+        ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+        ThrowUtils.throwIf(!space.getUserId().equals(loginUser.getId()), BusinessCodeEnum.NO_AUTH_ERROR, "没有空间权限");
+
+        // 2. 查询图片
+        List<Image> imageList = this.lambdaQuery()
+                .select(Image::getId, Image::getImageName)
+                .in(Image::getId, imageBatchUpdateRequest.getImageIds())
+                .eq(Image::getSpaceId, spaceId)
+                .list();
+        ThrowUtils.throwIf(CollUtil.isEmpty(imageList), BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
+
+        // 3. 批量更新图片分类和标签
+        String imageCategory = imageBatchUpdateRequest.getImageCategory();
+        List<String> imageTagList = imageBatchUpdateRequest.getImageTagList();
+        imageList.forEach(image -> {
+            if (StrUtil.isNotBlank(imageCategory)) {
+                image.setImageCategory(imageCategory);
+            }
+            if (CollUtil.isNotEmpty(imageTagList)) {
+                image.setImageTags(JSONUtil.toJsonStr(imageTagList));
+            }
+        });
+        return transactionTemplate.execute(status -> {
+            boolean result = this.updateBatchById(imageList);
+            ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+            return true;
+        });
+    }
+
 }
