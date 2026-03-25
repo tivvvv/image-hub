@@ -55,4 +55,16 @@ public class GlobalExceptionHandler {
         return ResultUtils.error(BusinessCodeEnum.SYSTEM_ERROR);
     }
 
+    /**
+     * 异常处理
+     *
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(Exception.class)
+    public BusinessResponse<?> businessExceptionHandler(Exception e) {
+        log.error("Exception", e);
+        return ResultUtils.error(BusinessCodeEnum.SYSTEM_ERROR);
+    }
+
 }
