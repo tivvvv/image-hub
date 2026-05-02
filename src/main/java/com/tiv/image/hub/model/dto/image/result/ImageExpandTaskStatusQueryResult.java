@@ -5,6 +5,7 @@ import lombok.Data;
 /**
  * 扩图任务状态查询结果
  */
+@Data
 public class ImageExpandTaskStatusQueryResult {
 
     /**

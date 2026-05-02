@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImageAiManager {
 
-    @Value("aliyun.apiKey")
+    @Value("${aliyun.apiKey}")
     private String apiKey;
 
     /**
