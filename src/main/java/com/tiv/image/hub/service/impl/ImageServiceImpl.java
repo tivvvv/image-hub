@@ -21,6 +21,7 @@ import com.tiv.image.hub.mapper.ImageMapper;
 import com.tiv.image.hub.mapper.SpaceMapper;
 import com.tiv.image.hub.model.dto.image.request.*;
 import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
+import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskStatusQueryResult;
 import com.tiv.image.hub.model.dto.image.result.ImageUploadResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
@@ -503,6 +504,11 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
                 .parameters(imageExpandRequest.getParameters())
                 .build();
         return imageAiManager.createImageExpandTask(imageExpandTaskCreateRequest);
+    }
+
+    @Override
+    public ImageExpandTaskStatusQueryResult queryImageExpandTaskStatus(String taskId) {
+        return imageAiManager.queryImageExpandTaskStatus(taskId);
     }
 
     /**

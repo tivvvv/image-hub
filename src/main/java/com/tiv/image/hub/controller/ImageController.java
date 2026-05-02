@@ -16,6 +16,7 @@ import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.model.dto.image.request.*;
 import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
+import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskStatusQueryResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
@@ -252,6 +253,12 @@ public class ImageController {
     public BusinessResponse<ImageExpandTaskCreateResult> expandImage(@RequestBody @Valid ImageExpandRequest imageExpandRequest,
                                                                      HttpServletRequest httpServletRequest) {
         return ResultUtils.success(imageService.expandImage(imageExpandRequest));
+    }
+
+    @GetMapping("/expand/task/status/{taskId}")
+    public BusinessResponse<ImageExpandTaskStatusQueryResult> queryImageExpandTaskStatus(@PathVariable String taskId,
+                                                                                         HttpServletRequest httpServletRequest) {
+        return ResultUtils.success(imageService.queryImageExpandTaskStatus(taskId));
     }
 
     /**

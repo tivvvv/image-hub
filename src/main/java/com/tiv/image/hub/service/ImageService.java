@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tiv.image.hub.model.dto.image.request.*;
 import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
+import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskStatusQueryResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.ImageVO;
@@ -126,5 +127,13 @@ public interface ImageService extends IService<Image> {
      * @return
      */
     ImageExpandTaskCreateResult expandImage(ImageExpandRequest imageExpandRequest);
+
+    /**
+     * 查询扩图任务状态
+     *
+     * @param taskId
+     * @return
+     */
+    ImageExpandTaskStatusQueryResult queryImageExpandTaskStatus(String taskId);
 
 }
