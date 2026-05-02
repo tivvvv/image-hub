@@ -21,7 +21,8 @@ public class ImageExpandTaskCreateRequest implements Serializable {
     /**
      * 模型
      */
-    private String model;
+    @Builder.Default
+    private String model = "image-out-painting";
 
     /**
      * 输入图像信息
