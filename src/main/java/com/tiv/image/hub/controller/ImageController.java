@@ -15,6 +15,7 @@ import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.model.dto.image.request.*;
+import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
@@ -238,6 +239,19 @@ public class ImageController {
         List<String> categoryList = Arrays.asList("模板", "电商", "表情包", "素材", "海报");
 
         return ResultUtils.success(new ImageTagCategory(tagList, categoryList));
+    }
+
+    /**
+     * AI 扩图
+     *
+     * @param imageExpandRequest
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/expand")
+    public BusinessResponse<ImageExpandTaskCreateResult> expandImage(@RequestBody @Valid ImageExpandRequest imageExpandRequest,
+                                                                     HttpServletRequest httpServletRequest) {
+        return ResultUtils.success(imageService.expandImage(imageExpandRequest));
     }
 
     /**

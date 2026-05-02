@@ -2,7 +2,10 @@ package com.tiv.image.hub.model.dto.image.request;
 
 import cn.hutool.core.annotation.Alias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 
@@ -10,6 +13,9 @@ import java.io.Serializable;
  * 扩图任务创建请求
  */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class ImageExpandTaskCreateRequest implements Serializable {
 
     /**
@@ -30,6 +36,8 @@ public class ImageExpandTaskCreateRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Input {
 
         /**
@@ -41,6 +49,8 @@ public class ImageExpandTaskCreateRequest implements Serializable {
     }
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Parameters {
 
         /**

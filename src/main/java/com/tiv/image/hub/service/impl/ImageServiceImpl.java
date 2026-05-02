@@ -14,11 +14,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.CosManager;
+import com.tiv.image.hub.manager.ai.ImageAiManager;
 import com.tiv.image.hub.manager.upload.FileImageUpload;
 import com.tiv.image.hub.manager.upload.UrlImageUpload;
 import com.tiv.image.hub.mapper.ImageMapper;
 import com.tiv.image.hub.mapper.SpaceMapper;
 import com.tiv.image.hub.model.dto.image.request.*;
+import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
 import com.tiv.image.hub.model.dto.image.result.ImageUploadResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
@@ -42,10 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -66,6 +65,9 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
 
     @Resource
     private SpaceMapper spaceMapper;
+
+    @Resource
+    private ImageAiManager imageAiManager;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -489,6 +491,18 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
             return true;
         });
+    }
+
+    @Override
+    public ImageExpandTaskCreateResult expandImage(ImageExpandRequest imageExpandRequest) {
+        Image image = Optional.ofNullable(this.getById(imageExpandRequest.getId()))
+                .orElseThrow(() -> new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在"));
+
+        ImageExpandTaskCreateRequest imageExpandTaskCreateRequest = ImageExpandTaskCreateRequest.builder()
+                .input(new ImageExpandTaskCreateRequest.Input(image.getImageUrl()))
+                .parameters(imageExpandRequest.getParameters())
+                .build();
+        return imageAiManager.createImageExpandTask(imageExpandTaskCreateRequest);
     }
 
     /**

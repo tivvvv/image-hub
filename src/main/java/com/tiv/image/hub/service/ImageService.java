@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tiv.image.hub.model.dto.image.request.*;
+import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.ImageVO;
@@ -117,4 +118,13 @@ public interface ImageService extends IService<Image> {
      * @return
      */
     Boolean batchUpdateImage(ImageBatchUpdateRequest imageBatchUpdateRequest, User loginUser);
+
+    /**
+     * 扩图
+     *
+     * @param imageExpandRequest
+     * @return
+     */
+    ImageExpandTaskCreateResult expandImage(ImageExpandRequest imageExpandRequest);
+
 }
