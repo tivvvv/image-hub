@@ -68,15 +68,10 @@ public class SpaceController {
      */
     @PostMapping("/update")
     public BusinessResponse<SpaceVO> updateSpace(@RequestBody @Valid SpaceUpdateRequest spaceUpdateRequest, HttpServletRequest httpServletRequest) {
-        // 判断空间是否存在
-        long id = spaceUpdateRequest.getId();
-        Space oldSpace = spaceService.getById(id);
-        ThrowUtils.throwIf(oldSpace == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-
+        Space oldSpace = spaceService.getById(spaceUpdateRequest.getId());
         User loginUser = userService.getLoginUser(httpServletRequest);
         // 仅创建人或管理员可更新空间
-        ThrowUtils.throwIf(!loginUser.getId().equals(oldSpace.getUserId())
-                && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
+        spaceService.checkSpaceAuth(loginUser, oldSpace);
 
         Space space = new Space();
         BeanUtils.copyProperties(spaceUpdateRequest, space);
@@ -90,7 +85,7 @@ public class SpaceController {
         // 更新库表
         boolean result = spaceService.updateById(space);
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
-        return getSpaceVOById(id);
+        return getSpaceVOById(spaceUpdateRequest.getId());
     }
 
     /**
@@ -126,12 +121,9 @@ public class SpaceController {
     public BusinessResponse<Boolean> deleteSpace(@RequestBody @Valid DeleteRequest deleteRequest,
                                                  HttpServletRequest httpServletRequest) {
         Space space = spaceService.getById(deleteRequest.getId());
-        ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-
         User loginUser = userService.getLoginUser(httpServletRequest);
         // 仅创建人或管理员可删除
-        ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId())
-                && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
+        spaceService.checkSpaceAuth(loginUser, space);
         boolean result = spaceService.removeById(deleteRequest.getId());
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
         return ResultUtils.success(true);

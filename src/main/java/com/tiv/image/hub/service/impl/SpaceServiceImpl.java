@@ -31,14 +31,13 @@ import java.util.stream.Collectors;
 @Service
 public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements SpaceService {
 
-
     @Resource
     private UserService userService;
 
-    private static final int SPACE_NAME_MAX_LENGTH = 50;
-
     @Resource
     private TransactionTemplate transactionTemplate;
+
+    private static final int SPACE_NAME_MAX_LENGTH = 50;
 
     @Override
     public void validateSpace(Space space, boolean isAdd) {
@@ -182,6 +181,16 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         if (space.getMaxCount() == null) {
             space.setMaxCount(spaceLevelEnum.getBaseMaxCount());
         }
+    }
+
+    @Override
+    public void checkSpaceAuth(User loginUser, Space space) {
+        ThrowUtils.throwIf(loginUser == null, BusinessCodeEnum.NOT_FOUND_ERROR, "用户不存在");
+        ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+
+        // 仅本人或管理员可编辑
+        ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId())
+                && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
     }
 
 }
