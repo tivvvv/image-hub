@@ -15,13 +15,13 @@ import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.model.dto.image.request.*;
-import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
-import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskStatusQueryResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.ImageReviewStatusEnum;
-import com.tiv.image.hub.model.vo.ImageTagCategory;
+import com.tiv.image.hub.model.vo.ImageExpandTaskCreateVO;
+import com.tiv.image.hub.model.vo.ImageExpandTaskStatusQueryVO;
+import com.tiv.image.hub.model.vo.ImageTagCategoryVO;
 import com.tiv.image.hub.model.vo.ImageVO;
 import com.tiv.image.hub.service.ImageService;
 import com.tiv.image.hub.service.SpaceService;
@@ -235,11 +235,11 @@ public class ImageController {
      * @return
      */
     @GetMapping("/tagList")
-    public BusinessResponse<ImageTagCategory> listImageTagCategory() {
+    public BusinessResponse<ImageTagCategoryVO> listImageTagCategory() {
         List<String> tagList = Arrays.asList("热门", "搞笑", "生活", "高清", "艺术", "校园", "背景", "简历", "创意");
         List<String> categoryList = Arrays.asList("模板", "电商", "表情包", "素材", "海报");
 
-        return ResultUtils.success(new ImageTagCategory(tagList, categoryList));
+        return ResultUtils.success(new ImageTagCategoryVO(tagList, categoryList));
     }
 
     /**
@@ -250,14 +250,14 @@ public class ImageController {
      * @return
      */
     @PostMapping("/expand")
-    public BusinessResponse<ImageExpandTaskCreateResult> expandImage(@RequestBody @Valid ImageExpandRequest imageExpandRequest,
-                                                                     HttpServletRequest httpServletRequest) {
+    public BusinessResponse<ImageExpandTaskCreateVO> expandImage(@RequestBody @Valid ImageExpandRequest imageExpandRequest,
+                                                                 HttpServletRequest httpServletRequest) {
         return ResultUtils.success(imageService.expandImage(imageExpandRequest));
     }
 
     @GetMapping("/expand/task/status/{taskId}")
-    public BusinessResponse<ImageExpandTaskStatusQueryResult> queryImageExpandTaskStatus(@PathVariable String taskId,
-                                                                                         HttpServletRequest httpServletRequest) {
+    public BusinessResponse<ImageExpandTaskStatusQueryVO> queryImageExpandTaskStatus(@PathVariable String taskId,
+                                                                                     HttpServletRequest httpServletRequest) {
         return ResultUtils.success(imageService.queryImageExpandTaskStatus(taskId));
     }
 

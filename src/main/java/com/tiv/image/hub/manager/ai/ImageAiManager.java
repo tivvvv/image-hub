@@ -7,8 +7,8 @@ import cn.hutool.json.JSONUtil;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.model.dto.image.request.ImageExpandTaskCreateRequest;
-import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
-import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskStatusQueryResult;
+import com.tiv.image.hub.model.vo.ImageExpandTaskCreateVO;
+import com.tiv.image.hub.model.vo.ImageExpandTaskStatusQueryVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -39,7 +39,7 @@ public class ImageAiManager {
      * @param imageExpandTaskCreateRequest
      * @return
      */
-    public ImageExpandTaskCreateResult createImageExpandTask(ImageExpandTaskCreateRequest imageExpandTaskCreateRequest) {
+    public ImageExpandTaskCreateVO createImageExpandTask(ImageExpandTaskCreateRequest imageExpandTaskCreateRequest) {
         if (imageExpandTaskCreateRequest == null) {
             throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR, "扩图参数为空");
         }
@@ -59,13 +59,13 @@ public class ImageAiManager {
                 throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "AI 扩图失败");
             }
 
-            ImageExpandTaskCreateResult imageExpandTaskCreateResult = JSONUtil.toBean(httpResponse.body(), ImageExpandTaskCreateResult.class);
-            if (imageExpandTaskCreateResult.getCode() != null) {
-                String errorMessage = imageExpandTaskCreateResult.getMessage();
+            ImageExpandTaskCreateVO imageExpandTaskCreateVO = JSONUtil.toBean(httpResponse.body(), ImageExpandTaskCreateVO.class);
+            if (imageExpandTaskCreateVO.getCode() != null) {
+                String errorMessage = imageExpandTaskCreateVO.getMessage();
                 log.error("扩图任务创建失败: {}", errorMessage);
                 throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "AI 扩图失败, " + errorMessage);
             }
-            return imageExpandTaskCreateResult;
+            return imageExpandTaskCreateVO;
         }
     }
 
@@ -75,7 +75,7 @@ public class ImageAiManager {
      * @param taskId
      * @return
      */
-    public ImageExpandTaskStatusQueryResult queryImageExpandTaskStatus(String taskId) {
+    public ImageExpandTaskStatusQueryVO queryImageExpandTaskStatus(String taskId) {
         if (StrUtil.isBlank(taskId)) {
             throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR, "任务 id 为空");
         }
@@ -90,7 +90,7 @@ public class ImageAiManager {
                 log.error("查询扩图任务状态请求异常: {}", httpResponse.body());
                 throw new BusinessException(BusinessCodeEnum.OPERATION_ERROR, "查询扩图任务结果失败");
             }
-            return JSONUtil.toBean(httpResponse.body(), ImageExpandTaskStatusQueryResult.class);
+            return JSONUtil.toBean(httpResponse.body(), ImageExpandTaskStatusQueryVO.class);
         }
     }
 

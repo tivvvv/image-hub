@@ -1,12 +1,12 @@
-package com.tiv.image.hub.model.dto.image.result;
+package com.tiv.image.hub.model.vo;
 
 import lombok.Data;
 
 /**
- * 扩图任务创建结果
+ * 扩图任务创建视图
  */
 @Data
-public class ImageExpandTaskCreateResult {
+public class ImageExpandTaskCreateVO {
 
     /**
      * 任务的输出信息

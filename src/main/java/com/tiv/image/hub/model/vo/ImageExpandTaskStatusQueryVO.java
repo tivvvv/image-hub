@@ -1,4 +1,4 @@
-package com.tiv.image.hub.model.dto.image.result;
+package com.tiv.image.hub.model.vo;
 
 import lombok.Data;
 
@@ -6,7 +6,7 @@ import lombok.Data;
  * 扩图任务状态查询结果
  */
 @Data
-public class ImageExpandTaskStatusQueryResult {
+public class ImageExpandTaskStatusQueryVO {
 
     /**
      * 请求唯一标识

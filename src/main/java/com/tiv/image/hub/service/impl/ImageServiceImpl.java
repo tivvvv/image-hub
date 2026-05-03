@@ -20,13 +20,13 @@ import com.tiv.image.hub.manager.upload.UrlImageUpload;
 import com.tiv.image.hub.mapper.ImageMapper;
 import com.tiv.image.hub.mapper.SpaceMapper;
 import com.tiv.image.hub.model.dto.image.request.*;
-import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskCreateResult;
-import com.tiv.image.hub.model.dto.image.result.ImageExpandTaskStatusQueryResult;
 import com.tiv.image.hub.model.dto.image.result.ImageUploadResult;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.ImageReviewStatusEnum;
+import com.tiv.image.hub.model.vo.ImageExpandTaskCreateVO;
+import com.tiv.image.hub.model.vo.ImageExpandTaskStatusQueryVO;
 import com.tiv.image.hub.model.vo.ImageVO;
 import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.ImageService;
@@ -495,7 +495,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     }
 
     @Override
-    public ImageExpandTaskCreateResult expandImage(ImageExpandRequest imageExpandRequest) {
+    public ImageExpandTaskCreateVO expandImage(ImageExpandRequest imageExpandRequest) {
         Image image = Optional.ofNullable(this.getById(imageExpandRequest.getId()))
                 .orElseThrow(() -> new BusinessException(BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在"));
 
@@ -507,7 +507,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     }
 
     @Override
-    public ImageExpandTaskStatusQueryResult queryImageExpandTaskStatus(String taskId) {
+    public ImageExpandTaskStatusQueryVO queryImageExpandTaskStatus(String taskId) {
         return imageAiManager.queryImageExpandTaskStatus(taskId);
     }
 

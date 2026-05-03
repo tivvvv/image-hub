@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 /**
- * 图片标签/分类列表
+ * 图片标签/分类列表视图
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ImageTagCategory {
+public class ImageTagCategoryVO {
 
     /**
      * 标签列表
