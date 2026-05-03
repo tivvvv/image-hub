@@ -1,5 +1,6 @@
 package com.tiv.image.hub.service.impl;
 
+import cn.hutool.core.util.NumberUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
@@ -61,7 +62,18 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
     }
 
     private SpaceUsageAnalysisVO analyzePrivateSpaceUsage(SpaceUsageAnalysisRequest spaceUsageAnalysisRequest, User loginUser) {
-        return null;
+        // 校验权限
+        checkSpaceAnalyzeAuth(spaceUsageAnalysisRequest, loginUser);
+        Space space = spaceService.getById(spaceUsageAnalysisRequest.getSpaceId());
+
+        return SpaceUsageAnalysisVO.builder()
+                .currentSize(space.getCurrentSize())
+                .maxSize(space.getMaxSize())
+                .currentCount(space.getCurrentCount())
+                .maxCount(space.getMaxCount())
+                .sizeUsageRatio(NumberUtil.round(space.getCurrentSize() * 100.0 / space.getMaxSize(), 2).doubleValue())
+                .countUsageRatio(NumberUtil.round(space.getCurrentCount() * 100.0 / space.getMaxCount(), 2).doubleValue())
+                .build();
     }
 
     private void checkSpaceAnalyzeAuth(SpaceAnalysisRequest spaceAnalysisRequest, User loginUser) {
