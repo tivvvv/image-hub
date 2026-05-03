@@ -5,10 +5,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceAnalysisRequest;
+import com.tiv.image.hub.model.dto.space.analysis.SpaceImageCategoryAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceUsageAnalysisRequest;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
+import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
 import com.tiv.image.hub.service.ImageService;
 import com.tiv.image.hub.service.SpaceAnalysisService;
@@ -20,6 +22,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -47,14 +51,12 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
         checkSpaceAnalyzeAuth(spaceUsageAnalysisRequest, loginUser);
 
         QueryWrapper<Image> queryWrapper = new QueryWrapper<>();
-        queryWrapper.select("image_size");
+        queryWrapper.select("count(1) as count", "ifnull(sum(image_size), 0) as totalSize");
         fillAnalyzeQueryWrapper(spaceUsageAnalysisRequest, queryWrapper);
 
-        List<Object> imageObjects = imageService.getBaseMapper().selectObjs(queryWrapper);
-        long usedSize = imageObjects.stream()
-                .mapToLong(obj -> (Long) obj)
-                .sum();
-        long usedCount = imageObjects.size();
+        Map<String, Object> resultMap = imageService.getBaseMapper().selectMaps(queryWrapper).get(0);
+        long usedSize = ((Number) resultMap.get("totalSize")).longValue();
+        long usedCount = ((Number) resultMap.get("count")).longValue();
         return SpaceUsageAnalysisVO.builder()
                 .currentSize(usedSize)
                 .currentCount(usedCount)
@@ -75,6 +77,26 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
                 .countUsageRatio(NumberUtil.round(space.getCurrentCount() * 100.0 / space.getMaxCount(), 2).doubleValue())
                 .build();
     }
+
+    @Override
+    public List<SpaceImageCategoryAnalysisVO> analyzeSpaceImageCategory(SpaceImageCategoryAnalysisRequest spaceImageCategoryAnalysisRequest, User loginUser) {
+        checkSpaceAnalyzeAuth(spaceImageCategoryAnalysisRequest, loginUser);
+        QueryWrapper<Image> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("image_category as imageCategory", "count(*) as count", "sum(image_size) as totalSize")
+                .groupBy("image_category");
+        fillAnalyzeQueryWrapper(spaceImageCategoryAnalysisRequest, queryWrapper);
+        return imageService.getBaseMapper().selectMaps(queryWrapper)
+                .stream()
+                .map(map -> {
+                    return SpaceImageCategoryAnalysisVO.builder()
+                            .imageCategory((String) map.get("imageCategory"))
+                            .count((Long) map.get("count"))
+                            .totalSize((Long) map.get("totalSize"))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
 
     private void checkSpaceAnalyzeAuth(SpaceAnalysisRequest spaceAnalysisRequest, User loginUser) {
         // 分析所有空间或公共图库-仅管理员可访问

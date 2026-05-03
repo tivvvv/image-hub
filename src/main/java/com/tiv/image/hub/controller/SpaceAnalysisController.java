@@ -1,8 +1,10 @@
 package com.tiv.image.hub.controller;
 
 import com.tiv.image.hub.common.BusinessResponse;
+import com.tiv.image.hub.model.dto.space.analysis.SpaceImageCategoryAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceUsageAnalysisRequest;
 import com.tiv.image.hub.model.entity.User;
+import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
 import com.tiv.image.hub.service.SpaceAnalysisService;
 import com.tiv.image.hub.service.UserService;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -39,6 +42,20 @@ public class SpaceAnalysisController {
                                                                     HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
         return ResultUtils.success(spaceAnalysisService.analyzeSpaceUsage(spaceUsageAnalysisRequest, loginUser));
+    }
+
+    /**
+     * 分析空间图片分类情况
+     *
+     * @param spaceImageCategoryAnalysisRequest
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/image/category")
+    public BusinessResponse<List<SpaceImageCategoryAnalysisVO>> analyzeSpaceImageCategory(@RequestBody SpaceImageCategoryAnalysisRequest spaceImageCategoryAnalysisRequest,
+                                                                                          HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        return ResultUtils.success(spaceAnalysisService.analyzeSpaceImageCategory(spaceImageCategoryAnalysisRequest, loginUser));
     }
 
 }
