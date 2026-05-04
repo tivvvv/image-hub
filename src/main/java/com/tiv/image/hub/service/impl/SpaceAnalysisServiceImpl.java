@@ -1,16 +1,20 @@
 package com.tiv.image.hub.service.impl;
 
 import cn.hutool.core.util.NumberUtil;
+import cn.hutool.core.util.ObjUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceImageCategoryAnalysisRequest;
+import com.tiv.image.hub.model.dto.space.analysis.SpaceImageTagAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceUsageAnalysisRequest;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
+import com.tiv.image.hub.model.vo.SpaceImageTagAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
 import com.tiv.image.hub.service.ImageService;
 import com.tiv.image.hub.service.SpaceAnalysisService;
@@ -92,6 +96,37 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
                             .imageCategory((String) map.get("imageCategory"))
                             .count((Long) map.get("count"))
                             .totalSize((Long) map.get("totalSize"))
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SpaceImageTagAnalysisVO> analyzeSpaceImageTag(SpaceImageTagAnalysisRequest spaceImageTagAnalysisRequest, User loginUser) {
+        checkSpaceAnalyzeAuth(spaceImageTagAnalysisRequest, loginUser);
+
+        QueryWrapper<Image> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("image_tags");
+        fillAnalyzeQueryWrapper(spaceImageTagAnalysisRequest, queryWrapper);
+
+        // 查询所有标签
+        List<String> tagsJsonList = imageService.getBaseMapper().selectObjs(queryWrapper)
+                .stream()
+                .filter(ObjUtil::isNotNull)
+                .map(Object::toString)
+                .collect(Collectors.toList());
+
+        // 解析标签并统计
+        Map<String, Long> tagCountMap = tagsJsonList.stream()
+                .flatMap(tagsJson -> JSONUtil.toList(tagsJson, String.class).stream())
+                .collect(Collectors.groupingBy(tag -> tag, Collectors.counting()));
+
+        return tagCountMap.entrySet().stream()
+                .sorted((e1, e2) -> Long.compare(e2.getValue(), e1.getValue()))
+                .map(entry -> {
+                    return SpaceImageTagAnalysisVO.builder()
+                            .tag(entry.getKey())
+                            .count(entry.getValue())
                             .build();
                 })
                 .collect(Collectors.toList());
