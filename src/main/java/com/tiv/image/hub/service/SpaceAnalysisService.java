@@ -1,14 +1,8 @@
 package com.tiv.image.hub.service;
 
-import com.tiv.image.hub.model.dto.space.analysis.SpaceImageCategoryAnalysisRequest;
-import com.tiv.image.hub.model.dto.space.analysis.SpaceImageSizeAnalysisRequest;
-import com.tiv.image.hub.model.dto.space.analysis.SpaceImageTagAnalysisRequest;
-import com.tiv.image.hub.model.dto.space.analysis.SpaceUsageAnalysisRequest;
+import com.tiv.image.hub.model.dto.space.analysis.*;
 import com.tiv.image.hub.model.entity.User;
-import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
-import com.tiv.image.hub.model.vo.SpaceImageSizeAnalysisVO;
-import com.tiv.image.hub.model.vo.SpaceImageTagAnalysisVO;
-import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
+import com.tiv.image.hub.model.vo.*;
 
 import java.util.List;
 
@@ -49,5 +43,14 @@ public interface SpaceAnalysisService {
      * @return
      */
     List<SpaceImageSizeAnalysisVO> analyzeSpaceImageSize(SpaceImageSizeAnalysisRequest spaceImageSizeAnalysisRequest, User loginUser);
+
+    /**
+     * 分析空间上传行为情况
+     *
+     * @param spaceUploadBehaviorAnalysisRequest
+     * @param loginUser
+     * @return
+     */
+    List<SpaceUploadBehaviorAnalysisVO> analyzeSpaceUploadBehavior(SpaceUploadBehaviorAnalysisRequest spaceUploadBehaviorAnalysisRequest, User loginUser);
 
 }

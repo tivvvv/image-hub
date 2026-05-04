@@ -10,10 +10,7 @@ import com.tiv.image.hub.model.dto.space.analysis.*;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
-import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
-import com.tiv.image.hub.model.vo.SpaceImageSizeAnalysisVO;
-import com.tiv.image.hub.model.vo.SpaceImageTagAnalysisVO;
-import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
+import com.tiv.image.hub.model.vo.*;
 import com.tiv.image.hub.service.ImageService;
 import com.tiv.image.hub.service.SpaceAnalysisService;
 import com.tiv.image.hub.service.SpaceService;
@@ -157,6 +154,46 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<SpaceUploadBehaviorAnalysisVO> analyzeSpaceUploadBehavior(SpaceUploadBehaviorAnalysisRequest spaceUploadBehaviorAnalysisRequest, User loginUser) {
+        // 校验权限
+        checkSpaceAnalyzeAuth(spaceUploadBehaviorAnalysisRequest, loginUser);
+
+        // 构造查询条件
+        QueryWrapper<Image> queryWrapper = new QueryWrapper<>();
+        Long userId = spaceUploadBehaviorAnalysisRequest.getUserId();
+        queryWrapper.eq(userId != null, "user_id", userId);
+        fillAnalyzeQueryWrapper(spaceUploadBehaviorAnalysisRequest, queryWrapper);
+
+        switch (spaceUploadBehaviorAnalysisRequest.getTimeDimension()) {
+            case DAY:
+                queryWrapper.select("DATE_FORMAT(create_time, '%Y-%m-%d') as timeRange", "count(*) as count");
+                break;
+            case WEEK:
+                queryWrapper.select("DATE_FORMAT(create_time, '%Y-%u') as timeRange", "count(*) as count");
+                break;
+            case MONTH:
+                queryWrapper.select("DATE_FORMAT(create_time, '%Y-%m') as timeRange", "count(*) as count");
+                break;
+            case YEAR:
+                queryWrapper.select("DATE_FORMAT(create_time, '%Y') as timeRange", "count(*) as count");
+                break;
+            default:
+                throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR, "不支持的时间维度");
+        }
+
+        // 分组排序
+        queryWrapper.groupBy("timeRange")
+                .orderByAsc("timeRange");
+
+        return imageService.getBaseMapper().selectMaps(queryWrapper)
+                .stream()
+                .map(map -> SpaceUploadBehaviorAnalysisVO.builder()
+                        .timeRange((String) map.get("timeRange"))
+                        .count((Long) map.get("count"))
+                        .build())
+                .collect(Collectors.toList());
+    }
 
     private void checkSpaceAnalyzeAuth(SpaceAnalysisRequest spaceAnalysisRequest, User loginUser) {
         // 分析所有空间或公共图库-仅管理员可访问
@@ -180,14 +217,14 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
         // 分析公共图库
         boolean queryPublic = spaceAnalysisRequest.isAnalyzePublic();
         if (queryPublic) {
-            queryWrapper.isNull("spaceId");
+            queryWrapper.isNull("space_id");
             return;
         }
 
         // 分析指定空间
         Long spaceId = spaceAnalysisRequest.getSpaceId();
         if (spaceId != null) {
-            queryWrapper.eq("spaceId", spaceId);
+            queryWrapper.eq("space_id", spaceId);
             return;
         }
         throw new BusinessException(BusinessCodeEnum.PARAMS_ERROR, "未指定分析范围");
