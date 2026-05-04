@@ -1,10 +1,12 @@
 package com.tiv.image.hub.service;
 
 import com.tiv.image.hub.model.dto.space.analysis.SpaceImageCategoryAnalysisRequest;
+import com.tiv.image.hub.model.dto.space.analysis.SpaceImageSizeAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceImageTagAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceUsageAnalysisRequest;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
+import com.tiv.image.hub.model.vo.SpaceImageSizeAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceImageTagAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
 
@@ -38,5 +40,14 @@ public interface SpaceAnalysisService {
      * @return
      */
     List<SpaceImageTagAnalysisVO> analyzeSpaceImageTag(SpaceImageTagAnalysisRequest spaceImageTagAnalysisRequest, User loginUser);
+
+    /**
+     * 分析空间图片大小情况
+     *
+     * @param spaceImageSizeAnalysisRequest
+     * @param loginUser
+     * @return
+     */
+    List<SpaceImageSizeAnalysisVO> analyzeSpaceImageSize(SpaceImageSizeAnalysisRequest spaceImageSizeAnalysisRequest, User loginUser);
 
 }

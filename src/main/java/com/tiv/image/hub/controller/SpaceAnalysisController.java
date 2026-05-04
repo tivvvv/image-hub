@@ -2,10 +2,12 @@ package com.tiv.image.hub.controller;
 
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceImageCategoryAnalysisRequest;
+import com.tiv.image.hub.model.dto.space.analysis.SpaceImageSizeAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceImageTagAnalysisRequest;
 import com.tiv.image.hub.model.dto.space.analysis.SpaceUsageAnalysisRequest;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
+import com.tiv.image.hub.model.vo.SpaceImageSizeAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceImageTagAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
 import com.tiv.image.hub.service.SpaceAnalysisService;
@@ -72,6 +74,20 @@ public class SpaceAnalysisController {
                                                                                 HttpServletRequest httpServletRequest) {
         User loginUser = userService.getLoginUser(httpServletRequest);
         return ResultUtils.success(spaceAnalysisService.analyzeSpaceImageTag(spaceImageTagAnalysisRequest, loginUser));
+    }
+
+    /**
+     * 分析空间图片大小情况
+     *
+     * @param spaceImageSizeAnalysisRequest
+     * @param httpServletRequest
+     * @return
+     */
+    @PostMapping("/image/size")
+    public BusinessResponse<List<SpaceImageSizeAnalysisVO>> analyzeSpaceImageSize(@RequestBody SpaceImageSizeAnalysisRequest spaceImageSizeAnalysisRequest,
+                                                                                  HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        return ResultUtils.success(spaceAnalysisService.analyzeSpaceImageSize(spaceImageSizeAnalysisRequest, loginUser));
     }
 
 }

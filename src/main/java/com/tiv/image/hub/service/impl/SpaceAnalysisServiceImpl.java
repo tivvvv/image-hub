@@ -6,14 +6,12 @@ import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
-import com.tiv.image.hub.model.dto.space.analysis.SpaceAnalysisRequest;
-import com.tiv.image.hub.model.dto.space.analysis.SpaceImageCategoryAnalysisRequest;
-import com.tiv.image.hub.model.dto.space.analysis.SpaceImageTagAnalysisRequest;
-import com.tiv.image.hub.model.dto.space.analysis.SpaceUsageAnalysisRequest;
+import com.tiv.image.hub.model.dto.space.analysis.*;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.SpaceImageCategoryAnalysisVO;
+import com.tiv.image.hub.model.vo.SpaceImageSizeAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceImageTagAnalysisVO;
 import com.tiv.image.hub.model.vo.SpaceUsageAnalysisVO;
 import com.tiv.image.hub.service.ImageService;
@@ -25,6 +23,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -129,6 +128,32 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
                             .count(entry.getValue())
                             .build();
                 })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SpaceImageSizeAnalysisVO> analyzeSpaceImageSize(SpaceImageSizeAnalysisRequest spaceImageSizeAnalysisRequest, User loginUser) {
+        checkSpaceAnalyzeAuth(spaceImageSizeAnalysisRequest, loginUser);
+
+        QueryWrapper<Image> queryWrapper = new QueryWrapper<>();
+        queryWrapper.select("image_size");
+        fillAnalyzeQueryWrapper(spaceImageSizeAnalysisRequest, queryWrapper);
+
+        List<Long> picSizeList = imageService.getBaseMapper().selectObjs(queryWrapper)
+                .stream()
+                .filter(ObjUtil::isNotNull)
+                .map(size -> (Long) size)
+                .collect(Collectors.toList());
+
+        // 定义分段范围, 使用有序的 Map
+        Map<String, Long> sizeRanges = new LinkedHashMap<>();
+        sizeRanges.put("<100KB", picSizeList.stream().filter(size -> size < 100 * 1024).count());
+        sizeRanges.put("100KB-500KB", picSizeList.stream().filter(size -> size >= 100 * 1024 && size < 500 * 1024).count());
+        sizeRanges.put("500KB-1MB", picSizeList.stream().filter(size -> size >= 500 * 1024 && size < 1024 * 1024).count());
+        sizeRanges.put(">1MB", picSizeList.stream().filter(size -> size >= 1024 * 1024).count());
+
+        return sizeRanges.entrySet().stream()
+                .map(entry -> SpaceImageSizeAnalysisVO.builder().sizeRange(entry.getKey()).count(entry.getValue()).build())
                 .collect(Collectors.toList());
     }
 
