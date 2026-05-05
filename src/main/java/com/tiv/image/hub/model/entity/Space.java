@@ -3,6 +3,7 @@ package com.tiv.image.hub.model.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
+import java.io.Serializable;
 import java.util.Date;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Date;
  */
 @Data
 @TableName(value = "space")
-public class Space {
+public class Space implements Serializable {
 
     /**
      * 空间id
@@ -31,6 +32,12 @@ public class Space {
      */
     @TableField(value = "space_level")
     private Integer spaceLevel;
+
+    /**
+     * 空间类型 0:私有,1:团队
+     */
+    @TableField(value = "space_type")
+    private Integer spaceType;
 
     /**
      * 空间图片的最大容量

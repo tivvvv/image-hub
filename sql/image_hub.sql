@@ -63,6 +63,7 @@ create table if not exists space
     id            bigint                             not null auto_increment comment '空间id',
     space_name    varchar(128)                       not null comment '空间名称',
     space_level   int      default 0                 not null comment '空间级别 0:普通版,1:专业版,2:旗舰版',
+    space_type    int      default 0                 not null comment '空间类型 0:私有,1:团队',
     max_size      bigint   default 0                 not null comment '空间图片的最大容量',
     max_count     bigint   default 0                 not null comment '空间图片的最大数量',
     current_size  bigint   default 0                 not null comment '当前空间已使用容量',
@@ -72,7 +73,23 @@ create table if not exists space
     update_time   datetime default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
     deleted       tinyint  default 0                 not null comment '是否删除',
     PRIMARY KEY (id),
-    index idx_userId (user_id),
-    index idx_space_name (space_name),
-    index idx_space_level (space_level)
-) comment '空间';
+    INDEX idx_userId (user_id),
+    INDEX idx_space_name (space_name),
+    INDEX idx_space_level (space_level),
+    INDEX idx_space_type (space_type)
+) comment '空间表';
+
+-- 空间成员表
+create table if not exists space_user
+(
+    id          bigint                                not null auto_increment comment '空间成员关联id',
+    space_id    bigint                                not null comment '空间id',
+    user_id     bigint                                not null comment '用户id',
+    space_role  varchar(32) default 'viewer'          not null comment '空间角色 viewer/editor/admin',
+    create_time datetime    default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time datetime    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    deleted     tinyint     default 0                 not null comment '是否删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_space_id_user_id (space_id, user_id),
+    INDEX idx_user_id (user_id)
+) comment '空间成员表';
