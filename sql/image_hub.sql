@@ -93,3 +93,75 @@ create table if not exists space_user
     UNIQUE KEY uk_space_id_user_id (space_id, user_id),
     INDEX idx_user_id (user_id)
 ) comment '空间成员表';
+
+-- 空间角色表
+create table if not exists space_role
+(
+    id          bigint                                not null auto_increment comment '空间角色id',
+    role_key    varchar(32)                           not null comment '角色标识 viewer/editor/admin',
+    role_name   varchar(64)                           not null comment '角色名称',
+    role_desc   varchar(256)                          null comment '角色描述',
+    create_time datetime    default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time datetime    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    deleted     tinyint     default 0                 not null comment '是否删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_role_key (role_key)
+) comment '空间角色表';
+
+-- 空间权限表
+create table if not exists space_permission
+(
+    id              bigint                                not null auto_increment comment '空间权限id',
+    permission_key  varchar(64)                           not null comment '权限标识',
+    permission_name varchar(64)                           not null comment '权限名称',
+    resource        varchar(32)                           not null comment '资源',
+    action          varchar(32)                           not null comment '操作',
+    permission_desc varchar(256)                          null comment '权限描述',
+    create_time     datetime    default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time     datetime    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    deleted         tinyint     default 0                 not null comment '是否删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_permission_key (permission_key),
+    INDEX idx_resource (resource)
+) comment '空间权限表';
+
+-- 空间角色权限关联表
+create table if not exists space_role_permission
+(
+    id            bigint                                not null auto_increment comment '关联id',
+    role_id       bigint                                not null comment '空间角色id',
+    permission_id bigint                                not null comment '空间权限id',
+    create_time   datetime    default CURRENT_TIMESTAMP not null comment '创建时间',
+    update_time   datetime    default CURRENT_TIMESTAMP not null on update CURRENT_TIMESTAMP comment '更新时间',
+    deleted       tinyint     default 0                 not null comment '是否删除',
+    PRIMARY KEY (id),
+    UNIQUE KEY uk_role_id_permission_id (role_id, permission_id),
+    INDEX idx_permission_id (permission_id)
+) comment '空间角色权限关联表';
+
+-- 初始化空间角色
+insert into space_role (id, role_key, role_name, role_desc)
+values (1, 'viewer', '浏览者', '仅可查看空间内的图片'),
+       (2, 'editor', '编辑者', '可查看,上传,编辑,删除图片'),
+       (3, 'admin', '管理员', '拥有空间内全部权限,包括成员管理');
+
+-- 初始化空间权限
+insert into space_permission (id, permission_key, permission_name, resource, action, permission_desc)
+values (1, 'image:view', '查看图片', 'image', 'view', '查看空间内的图片'),
+       (2, 'image:upload', '上传图片', 'image', 'upload', '向空间上传图片'),
+       (3, 'image:edit', '编辑图片', 'image', 'edit', '编辑空间内的图片'),
+       (4, 'image:delete', '删除图片', 'image', 'delete', '删除空间内的图片'),
+       (5, 'spaceUser:manage', '成员管理', 'spaceUser', 'manage', '管理空间成员');
+
+-- 初始化角色权限关联
+insert into space_role_permission (role_id, permission_id)
+values (1, 1),
+       (2, 1),
+       (2, 2),
+       (2, 3),
+       (2, 4),
+       (3, 1),
+       (3, 2),
+       (3, 3),
+       (3, 4),
+       (3, 5);
