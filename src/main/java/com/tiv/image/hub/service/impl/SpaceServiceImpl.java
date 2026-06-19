@@ -14,6 +14,7 @@ import com.tiv.image.hub.model.dto.space.SpaceQueryRequest;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.SpaceLevelEnum;
+import com.tiv.image.hub.model.enums.SpaceTypeEnum;
 import com.tiv.image.hub.model.vo.SpaceVO;
 import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.SpaceService;
@@ -45,7 +46,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         String spaceName = space.getSpaceName();
         Integer spaceLevel = space.getSpaceLevel();
         SpaceLevelEnum spaceLevelEnum = SpaceLevelEnum.getEnumByValue(spaceLevel);
-
+        SpaceTypeEnum spaceTypeEnum = SpaceTypeEnum.getEnumByValue(space.getSpaceType());
         if (isAdd) {
             // 新建时校验
             ThrowUtils.throwIf(StrUtil.isBlank(spaceName), BusinessCodeEnum.PARAMS_ERROR, "空间名称不能为空");
@@ -53,6 +54,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
                     BusinessCodeEnum.PARAMS_ERROR, "空间名称过长");
 
             ThrowUtils.throwIf(spaceLevelEnum == null, BusinessCodeEnum.PARAMS_ERROR, "空间级别不能为空");
+            ThrowUtils.throwIf(spaceTypeEnum == null, BusinessCodeEnum.PARAMS_ERROR, "空间类型不能为空");
         } else {
             // 更新时校验
             ThrowUtils.throwIf(space.getId() == null, BusinessCodeEnum.PARAMS_ERROR, "id不能为空");
@@ -88,15 +90,17 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         populateQuotaBySpaceLevel(space);
 
         // 4. 更新库表
-        // 每个用户只能有一个空间,锁+事务
+        // 每个用户只能有一个私有空间和一个团队空间,锁+事务
         String lock = String.valueOf(userId).intern();
         synchronized (lock) {
             transactionTemplate.execute(status -> {
                 // 判断是否已有空间
                 boolean exists = this.lambdaQuery()
                         .eq(Space::getUserId, userId)
+                        .eq(Space::getSpaceType, space.getSpaceType())
                         .exists();
-                ThrowUtils.throwIf(exists, BusinessCodeEnum.FORBIDDEN_ERROR, "每个用户最多创建一个空间");
+                SpaceTypeEnum spaceTypeEnum = SpaceTypeEnum.getEnumByValue(space.getSpaceType());
+                ThrowUtils.throwIf(exists, BusinessCodeEnum.FORBIDDEN_ERROR, String.format("每个用户最多创建一个%s", spaceTypeEnum.getDesc()));
                 // 创建
                 boolean result = this.save(space);
                 ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存空间失败");
@@ -162,6 +166,7 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
         queryWrapper.eq(spaceQueryRequest.getId() != null, "id", spaceQueryRequest.getId());
         queryWrapper.like(StrUtil.isNotBlank(spaceQueryRequest.getSpaceName()), "space_name", spaceQueryRequest.getSpaceName());
         queryWrapper.eq(spaceQueryRequest.getSpaceLevel() != null, "space_level", spaceQueryRequest.getSpaceLevel());
+        queryWrapper.eq(spaceQueryRequest.getSpaceType() != null, "space_type", spaceQueryRequest.getSpaceType());
         queryWrapper.eq(spaceQueryRequest.getUserId() != null, "user_id", spaceQueryRequest.getUserId());
 
         queryWrapper.orderBy(StrUtil.isNotBlank(spaceQueryRequest.getSortField()),
