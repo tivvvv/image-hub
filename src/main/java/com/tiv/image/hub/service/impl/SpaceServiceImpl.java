@@ -12,12 +12,15 @@ import com.tiv.image.hub.mapper.SpaceMapper;
 import com.tiv.image.hub.model.dto.space.SpaceAddRequest;
 import com.tiv.image.hub.model.dto.space.SpaceQueryRequest;
 import com.tiv.image.hub.model.entity.Space;
+import com.tiv.image.hub.model.entity.SpaceUser;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.enums.SpaceLevelEnum;
+import com.tiv.image.hub.model.enums.SpaceRoleEnum;
 import com.tiv.image.hub.model.enums.SpaceTypeEnum;
 import com.tiv.image.hub.model.vo.SpaceVO;
 import com.tiv.image.hub.model.vo.UserVO;
 import com.tiv.image.hub.service.SpaceService;
+import com.tiv.image.hub.service.SpaceUserService;
 import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ThrowUtils;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private SpaceUserService spaceUserService;
 
     @Resource
     private TransactionTemplate transactionTemplate;
@@ -105,6 +111,16 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
                 boolean result = this.save(space);
                 ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存空间失败");
 
+                // 创建团队空间时添加默认管理员
+                if (spaceTypeEnum == SpaceTypeEnum.TEAM) {
+                    SpaceUser spaceUser = SpaceUser.builder()
+                            .spaceId(space.getId())
+                            .userId(userId)
+                            .spaceRole(SpaceRoleEnum.ADMIN.getValue())
+                            .build();
+                    result = spaceUserService.save(spaceUser);
+                    ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存空间成员失败");
+                }
                 return space;
             });
         }
