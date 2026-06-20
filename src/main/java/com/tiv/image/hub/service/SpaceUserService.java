@@ -13,14 +13,6 @@ import java.util.List;
 public interface SpaceUserService extends IService<SpaceUser> {
 
     /**
-     * 校验空间成员参数
-     *
-     * @param spaceUser
-     * @param isAdd
-     */
-    void validSpaceUser(SpaceUser spaceUser, boolean isAdd);
-
-    /**
      * 创建空间成员
      *
      * @param spaceUserAddRequest

@@ -41,35 +41,20 @@ public class SpaceUserServiceImpl extends ServiceImpl<SpaceUserMapper, SpaceUser
     private SpaceService spaceService;
 
     @Override
-    public void validSpaceUser(SpaceUser spaceUser, boolean isAdd) {
-        ThrowUtils.throwIf(spaceUser == null, BusinessCodeEnum.PARAMS_ERROR);
-        Long spaceId = spaceUser.getSpaceId();
-        Long userId = spaceUser.getUserId();
-        if (isAdd) {
-            ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), BusinessCodeEnum.PARAMS_ERROR);
-            User user = userService.getById(userId);
-            ThrowUtils.throwIf(user == null, BusinessCodeEnum.NOT_FOUND_ERROR, "用户不存在");
-            Space space = spaceService.getById(spaceId);
-            ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
-        }
-        // 校验空间角色
-        String spaceRole = spaceUser.getSpaceRole();
-        SpaceRoleEnum spaceRoleEnum = SpaceRoleEnum.getEnumByValue(spaceRole);
-        ThrowUtils.throwIf(spaceRoleEnum == null, BusinessCodeEnum.PARAMS_ERROR, "空间角色不存在");
-        // 校验空间用户是否存在
-        if (spaceUser.getId() != null) {
-            ThrowUtils.throwIf(getById(spaceUser.getId()) == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-        }
-    }
-
-    @Override
     public long addSpaceUser(SpaceUserAddRequest spaceUserAddRequest) {
-        // 参数校验
-        SpaceUser spaceUser = new SpaceUser();
-        BeanUtils.copyProperties(spaceUserAddRequest, spaceUser);
-        validSpaceUser(spaceUser, true);
+        Long spaceId = spaceUserAddRequest.getSpaceId();
+        Long userId = spaceUserAddRequest.getUserId();
+        // 校验参数
+        ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), BusinessCodeEnum.PARAMS_ERROR);
+        ThrowUtils.throwIf(SpaceRoleEnum.getEnumByValue(spaceUserAddRequest.getSpaceRole()) == null,
+                BusinessCodeEnum.PARAMS_ERROR, "空间角色不存在");
+        // 校验用户和空间是否存在
+        ThrowUtils.throwIf(userService.getById(userId) == null, BusinessCodeEnum.NOT_FOUND_ERROR, "用户不存在");
+        ThrowUtils.throwIf(spaceService.getById(spaceId) == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
 
         // 更新库表
+        SpaceUser spaceUser = new SpaceUser();
+        BeanUtils.copyProperties(spaceUserAddRequest, spaceUser);
         boolean result = this.save(spaceUser);
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
         return spaceUser.getId();

@@ -12,9 +12,11 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
+import com.tiv.image.hub.constant.SpaceUserPermissionKeys;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.CosManager;
 import com.tiv.image.hub.manager.ai.ImageAiManager;
+import com.tiv.image.hub.manager.auth.SpaceUserAuthManager;
 import com.tiv.image.hub.manager.upload.FileImageUpload;
 import com.tiv.image.hub.manager.upload.UrlImageUpload;
 import com.tiv.image.hub.mapper.ImageMapper;
@@ -68,6 +70,9 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     private SpaceMapper spaceMapper;
 
     @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
+
+    @Resource
     private ImageAiManager imageAiManager;
 
     @Resource
@@ -110,8 +115,8 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             // 校验空间是否存在
             Space space = spaceMapper.selectById(spaceId);
             ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
-            // 校验空间权限,仅空间所有者可以上传
-            ThrowUtils.throwIf(!loginUser.getId().equals(space.getUserId()), BusinessCodeEnum.NO_AUTH_ERROR);
+            // 校验空间上传权限
+            spaceUserAuthManager.checkPermission(space, loginUser, SpaceUserPermissionKeys.IMAGE_UPLOAD);
             // 校验空间容量
             ThrowUtils.throwIf(space.getCurrentSize() >= space.getMaxSize(), BusinessCodeEnum.OPERATION_ERROR, "可用空间容量不足");
             ThrowUtils.throwIf(space.getCurrentCount() >= space.getMaxCount(), BusinessCodeEnum.OPERATION_ERROR, "可用图片数量不足");
@@ -122,9 +127,11 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             // 更新图片,需校验图片是否存在
             existedImage = this.getById(imageId);
             ThrowUtils.throwIf(existedImage == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
-            // 仅创建人和管理员可更新图片
-            ThrowUtils.throwIf(!loginUser.getId().equals(existedImage.getUserId())
-                    && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
+            // 更新公共图库,仅创建人和系统管理员可操作
+            if (existedImage.getSpaceId() == null) {
+                ThrowUtils.throwIf(!loginUser.getId().equals(existedImage.getUserId())
+                        && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
+            }
         }
 
         // 创建目录
@@ -390,25 +397,31 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         }
     }
 
-    @Override
-    public void validateImageAuth(Image image, User loginUser) {
+    /**
+     * 校验登录用户对图片的操作权限
+     *
+     * @param image      图片
+     * @param loginUser  登录用户
+     * @param permission 权限标识
+     */
+    private void checkImageAuth(Image image, User loginUser, String permission) {
         Long spaceId = image.getSpaceId();
-        Long userId = loginUser.getId();
         if (spaceId == null) {
-            // 公共空间,图片创建人和管理员可操作
-            ThrowUtils.throwIf(!userId.equals(image.getUserId())
-                    && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
+            // 公共图库,创建人或管理员可操作
+            ThrowUtils.throwIf(!loginUser.getId().equals(image.getUserId()) && !userService.isAdmin(loginUser),
+                    BusinessCodeEnum.NO_AUTH_ERROR);
         } else {
-            // 私有空间,仅图片创建人可操作
-            ThrowUtils.throwIf(!userId.equals(image.getUserId()), BusinessCodeEnum.NO_AUTH_ERROR);
+            // 空间图片,按空间角色权限校验
+            Space space = spaceMapper.selectById(spaceId);
+            ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+            spaceUserAuthManager.checkPermission(space, loginUser, permission);
         }
     }
 
     @Override
     public Boolean deleteImage(Image image, User loginUser) {
-        // 校验权限
-        validateImageAuth(image, loginUser);
-
+        // 校验删除权限
+        checkImageAuth(image, loginUser, SpaceUserPermissionKeys.IMAGE_DELETE);
         transactionTemplate.execute(status -> {
             boolean result = removeById(image.getId());
             ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
@@ -437,8 +450,8 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         Image oldImage = getById(id);
         ThrowUtils.throwIf(oldImage == null, BusinessCodeEnum.NOT_FOUND_ERROR);
 
-        // 校验权限
-        validateImageAuth(oldImage, loginUser);
+        // 校验编辑权限
+        checkImageAuth(oldImage, loginUser, SpaceUserPermissionKeys.IMAGE_EDIT);
 
         Image image = new Image();
         BeanUtils.copyProperties(imageUpdateRequest, image);
@@ -458,11 +471,11 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
 
     @Override
     public Boolean batchUpdateImage(ImageBatchUpdateRequest imageBatchUpdateRequest, User loginUser) {
-        // 1. 校验空间权限
+        // 1. 校验空间编辑权限
         Long spaceId = imageBatchUpdateRequest.getSpaceId();
         Space space = spaceMapper.selectById(spaceId);
         ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
-        ThrowUtils.throwIf(!space.getUserId().equals(loginUser.getId()), BusinessCodeEnum.NO_AUTH_ERROR, "没有空间权限");
+        spaceUserAuthManager.checkPermission(space, loginUser, SpaceUserPermissionKeys.IMAGE_EDIT);
 
         // 2. 查询图片
         List<Image> imageList = this.lambdaQuery()

@@ -3,6 +3,7 @@ package com.tiv.image.hub.model.dto.space.user;
 import lombok.Data;
 
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -14,6 +15,7 @@ public class SpaceUserUpdateRequest implements Serializable {
     /**
      * 空间成员关联id
      */
+    @NotNull(message = "id不能为空")
     @Min(value = 1L, message = "id不能小于1")
     private Long id;
 

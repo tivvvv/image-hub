@@ -14,6 +14,8 @@ import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
 import com.tiv.image.hub.constant.Constants;
+import com.tiv.image.hub.constant.SpaceUserPermissionKeys;
+import com.tiv.image.hub.manager.auth.SpaceUserAuthManager;
 import com.tiv.image.hub.model.dto.image.request.*;
 import com.tiv.image.hub.model.entity.Image;
 import com.tiv.image.hub.model.entity.Space;
@@ -63,6 +65,9 @@ public class ImageController {
 
     @Resource
     private SpaceService spaceService;
+
+    @Resource
+    private SpaceUserAuthManager spaceUserAuthManager;
 
     @Resource
     private StringRedisTemplate stringRedisTemplate;
@@ -161,7 +166,10 @@ public class ImageController {
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
-        Page<Image> imagePage = doListImage(imageQueryRequest, userService.getLoginUser(httpServletRequest));
+        // 校验空间查看权限
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        checkSpaceImageViewAuth(imageQueryRequest, loginUser);
+        Page<Image> imagePage = doListImage(imageQueryRequest);
         // 获取封装类
         return ResultUtils.success(imageService.getImageVOPage(imagePage));
     }
@@ -175,6 +183,9 @@ public class ImageController {
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
+        // 校验空间查看权限
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        checkSpaceImageViewAuth(imageQueryRequest, loginUser);
 
         // 1. 查询本地缓存
         String queryCondition = JSONUtil.toJsonStr(imageQueryRequest);
@@ -198,7 +209,7 @@ public class ImageController {
         }
 
         // 3. 多级缓存都未命中,查询数据库
-        Page<Image> imagePage = doListImage(imageQueryRequest, userService.getLoginUser(httpServletRequest));
+        Page<Image> imagePage = doListImage(imageQueryRequest);
         // 获取封装类
         Page<ImageVO> imageVOPage = imageService.getImageVOPage(imagePage);
 
@@ -252,6 +263,9 @@ public class ImageController {
     @PostMapping("/expand")
     public BusinessResponse<ImageExpandTaskCreateVO> expandImage(@RequestBody @Valid ImageExpandRequest imageExpandRequest,
                                                                  HttpServletRequest httpServletRequest) {
+        User loginUser = userService.getLoginUser(httpServletRequest);
+        // 校验图片查看权限
+        doGetImage(imageExpandRequest.getId(), loginUser);
         return ResultUtils.success(imageService.expandImage(imageExpandRequest));
     }
 
@@ -277,7 +291,7 @@ public class ImageController {
     @PostMapping("/page")
     @AuthCheck(mustRole = Constants.ADMIN_ROLE)
     public BusinessResponse<Page<Image>> listImageByPage(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
-        return ResultUtils.success(doListImage(imageQueryRequest, userService.getLoginUser(httpServletRequest)));
+        return ResultUtils.success(doListImage(imageQueryRequest));
     }
 
     /**
@@ -311,23 +325,41 @@ public class ImageController {
         return ResultUtils.success(imageService.fetchImage(imageFetchRequest, loginUser));
     }
 
-    private Image doGetImage(long id, User loginUser) {
-        ThrowUtils.throwIf(id <= 0, BusinessCodeEnum.PARAMS_ERROR);
-        Image image = imageService.getById(id);
+    private Image doGetImage(long imageId, User loginUser) {
+        ThrowUtils.throwIf(imageId <= 0, BusinessCodeEnum.PARAMS_ERROR);
+        Image image = imageService.getById(imageId);
         ThrowUtils.throwIf(image == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-        if (image.getSpaceId() != null) {
-            // 私有空间
-            imageService.validateImageAuth(image, loginUser);
+        Long spaceId = image.getSpaceId();
+        if (spaceId != null) {
+            // 空间图片,校验查看权限
+            Space space = spaceService.getById(spaceId);
+            ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+            List<String> permissions = spaceUserAuthManager.getPermissionList(space, loginUser);
+            ThrowUtils.throwIf(!permissions.contains(SpaceUserPermissionKeys.IMAGE_VIEW),
+                    BusinessCodeEnum.NO_AUTH_ERROR);
         }
         return image;
     }
 
-    private Page<Image> doListImage(ImageQueryRequest imageQueryRequest, User loginUser) {
-        if (imageQueryRequest.getSpaceId() != null) {
-            Space space = spaceService.getById(imageQueryRequest.getSpaceId());
-            ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
-            ThrowUtils.throwIf(!space.getUserId().equals(loginUser.getId()), BusinessCodeEnum.NO_AUTH_ERROR, "没有空间权限");
+    /**
+     * 校验空间图片查看权限(查询公共图库无需校验)
+     *
+     * @param imageQueryRequest 查询条件
+     * @param loginUser         登录用户
+     */
+    private void checkSpaceImageViewAuth(ImageQueryRequest imageQueryRequest, User loginUser) {
+        Long spaceId = imageQueryRequest.getSpaceId();
+        if (spaceId == null) {
+            return;
         }
+        Space space = spaceService.getById(spaceId);
+        ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+        List<String> permissions = spaceUserAuthManager.getPermissionList(space, loginUser);
+        ThrowUtils.throwIf(!permissions.contains(SpaceUserPermissionKeys.IMAGE_VIEW),
+                BusinessCodeEnum.NO_AUTH_ERROR, "没有空间权限");
+    }
+
+    private Page<Image> doListImage(ImageQueryRequest imageQueryRequest) {
         long current = imageQueryRequest.getCurrent();
         long size = imageQueryRequest.getPageSize();
 

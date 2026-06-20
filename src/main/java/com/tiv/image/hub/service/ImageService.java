@@ -86,14 +86,6 @@ public interface ImageService extends IService<Image> {
     void clearImageFile(Image image);
 
     /**
-     * 校验用户是否有指定图片权限
-     *
-     * @param image
-     * @param loginUser
-     */
-    void validateImageAuth(Image image, User loginUser);
-
-    /**
      * 删除图片
      *
      * @param image
