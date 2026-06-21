@@ -1,8 +1,8 @@
 package com.tiv.image.hub.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.tiv.image.hub.annotation.AuthCheck;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
@@ -17,7 +17,6 @@ import com.tiv.image.hub.util.ThrowUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -47,36 +46,33 @@ public class UserController {
      * 用户登录
      *
      * @param userLoginRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/login")
-    public BusinessResponse<LoginUserVO> userLogin(@RequestBody @Valid UserLoginRequest userLoginRequest, HttpServletRequest httpServletRequest) {
-        LoginUserVO loginUserVO = userService.userLogin(userLoginRequest.getUserAccount(), userLoginRequest.getUserPassword(), httpServletRequest);
+    public BusinessResponse<LoginUserVO> userLogin(@RequestBody @Valid UserLoginRequest userLoginRequest) {
+        LoginUserVO loginUserVO = userService.userLogin(userLoginRequest.getUserAccount(), userLoginRequest.getUserPassword());
         return ResultUtils.success(loginUserVO);
     }
 
     /**
      * 获取当前登录用户
      *
-     * @param httpServletRequest
      * @return
      */
     @GetMapping("/login")
-    public BusinessResponse<LoginUserVO> getLoginUser(HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<LoginUserVO> getLoginUser() {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(userService.getLoginUserVO(loginUser));
     }
 
     /**
      * 用户登出
      *
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/logout")
-    public BusinessResponse<Void> userLogout(HttpServletRequest httpServletRequest) {
-        userService.userLogout(httpServletRequest);
+    public BusinessResponse<Void> userLogout() {
+        userService.userLogout();
         return ResultUtils.success(null);
     }
 
@@ -87,7 +83,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/add")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<Long> addUser(@RequestBody @Valid UserAddRequest userAddRequest) {
         User user = new User();
         BeanUtil.copyProperties(userAddRequest, user);
@@ -109,7 +105,7 @@ public class UserController {
      * @return
      */
     @GetMapping("/{id}")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<User> getUserById(@PathVariable long id) {
         ThrowUtils.throwIf(id <= 0, BusinessCodeEnum.PARAMS_ERROR);
         User user = userService.getById(id);
@@ -137,7 +133,7 @@ public class UserController {
      * @return
      */
     @DeleteMapping()
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<Boolean> deleteUser(@RequestBody @Valid DeleteRequest deleteRequest) {
         boolean result = userService.removeById(deleteRequest.getId());
         ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
@@ -151,7 +147,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/update")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<Boolean> updateUser(@RequestBody @Valid UserUpdateRequest userUpdateRequest) {
         User user = new User();
         BeanUtil.copyProperties(userUpdateRequest, user);
@@ -167,7 +163,7 @@ public class UserController {
      * @return
      */
     @PostMapping("/page/vo")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
         long current = userQueryRequest.getCurrent();
         long pageSize = userQueryRequest.getPageSize();

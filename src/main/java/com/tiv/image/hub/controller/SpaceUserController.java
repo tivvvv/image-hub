@@ -23,7 +23,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.List;
 
@@ -51,10 +50,9 @@ public class SpaceUserController {
      * 添加空间成员
      */
     @PostMapping("/add")
-    public BusinessResponse<Long> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest,
-                                               HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Long> addSpaceUser(@RequestBody SpaceUserAddRequest spaceUserAddRequest) {
         // 校验成员管理权限
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         checkSpaceUserManageAuth(spaceUserAddRequest.getSpaceId(), loginUser);
         return ResultUtils.success(spaceUserService.addSpaceUser(spaceUserAddRequest));
     }
@@ -63,8 +61,7 @@ public class SpaceUserController {
      * 编辑空间成员
      */
     @PostMapping("/update")
-    public BusinessResponse<Boolean> editSpaceUser(@RequestBody @Valid SpaceUserUpdateRequest spaceUserUpdateRequest,
-                                                   HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> editSpaceUser(@RequestBody @Valid SpaceUserUpdateRequest spaceUserUpdateRequest) {
         // 校验空间角色合法性
         String spaceRole = spaceUserUpdateRequest.getSpaceRole();
         ThrowUtils.throwIf(SpaceRoleEnum.getEnumByValue(spaceRole) == null,
@@ -73,7 +70,7 @@ public class SpaceUserController {
         SpaceUser oldSpaceUser = spaceUserService.getById(spaceUserUpdateRequest.getId());
         ThrowUtils.throwIf(oldSpaceUser == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间成员不存在");
         // 校验成员管理权限
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         checkSpaceUserManageAuth(oldSpaceUser.getSpaceId(), loginUser);
 
         // 更新空间角色
@@ -88,12 +85,11 @@ public class SpaceUserController {
      * 移除空间成员
      */
     @DeleteMapping()
-    public BusinessResponse<Boolean> deleteSpaceUser(@RequestBody @Valid DeleteRequest deleteRequest,
-                                                     HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> deleteSpaceUser(@RequestBody @Valid DeleteRequest deleteRequest) {
         SpaceUser spaceUser = spaceUserService.getById(deleteRequest.getId());
         ThrowUtils.throwIf(spaceUser == null, BusinessCodeEnum.NOT_FOUND_ERROR);
         // 校验成员管理权限
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         checkSpaceUserManageAuth(spaceUser.getSpaceId(), loginUser);
 
         return ResultUtils.success(spaceUserService.removeById(deleteRequest.getId()));
@@ -103,13 +99,12 @@ public class SpaceUserController {
      * 查询指定空间成员
      */
     @PostMapping("/vo")
-    public BusinessResponse<SpaceUser> getSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest,
-                                                    HttpServletRequest httpServletRequest) {
+    public BusinessResponse<SpaceUser> getSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
         Long spaceId = spaceUserQueryRequest.getSpaceId();
         Long userId = spaceUserQueryRequest.getUserId();
         ThrowUtils.throwIf(ObjectUtil.hasEmpty(spaceId, userId), BusinessCodeEnum.PARAMS_ERROR);
         // 校验成员管理权限
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         checkSpaceUserManageAuth(spaceId, loginUser);
 
         SpaceUser spaceUser = spaceUserService.getOne(spaceUserService.getQueryWrapper(spaceUserQueryRequest));
@@ -121,10 +116,9 @@ public class SpaceUserController {
      * 查询空间成员列表
      */
     @PostMapping("/vo/list")
-    public BusinessResponse<List<SpaceUserVO>> listSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest,
-                                                             HttpServletRequest httpServletRequest) {
+    public BusinessResponse<List<SpaceUserVO>> listSpaceUser(@RequestBody SpaceUserQueryRequest spaceUserQueryRequest) {
         // 校验成员管理权限
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         checkSpaceUserManageAuth(spaceUserQueryRequest.getSpaceId(), loginUser);
 
         List<SpaceUser> spaceUserList = spaceUserService.list(
@@ -137,8 +131,8 @@ public class SpaceUserController {
      * 查询我加入的团队空间的成员列表
      */
     @PostMapping("/vo/list/my")
-    public BusinessResponse<List<SpaceUserVO>> listMyTeamSpaceUser(HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<List<SpaceUserVO>> listMyTeamSpaceUser() {
+        User loginUser = userService.getLoginUser();
         SpaceUserQueryRequest spaceUserQueryRequest = new SpaceUserQueryRequest();
         spaceUserQueryRequest.setUserId(loginUser.getId());
 

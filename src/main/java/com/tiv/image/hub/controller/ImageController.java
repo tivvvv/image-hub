@@ -1,5 +1,6 @@
 package com.tiv.image.hub.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import cn.hutool.core.util.StrUtil;
@@ -9,7 +10,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.tiv.image.hub.annotation.AuthCheck;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
@@ -38,7 +38,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.awt.*;
 import java.time.Duration;
@@ -88,14 +87,12 @@ public class ImageController {
      *
      * @param multipartFile
      * @param imageUploadRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/upload")
     public BusinessResponse<ImageVO> uploadImage(@RequestPart("file") MultipartFile multipartFile,
-                                                 ImageUploadRequest imageUploadRequest,
-                                                 HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+                                                 ImageUploadRequest imageUploadRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(imageService.uploadImage(multipartFile, imageUploadRequest, loginUser));
     }
 
@@ -103,13 +100,11 @@ public class ImageController {
      * 根据url上传图片
      *
      * @param imageUploadRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/upload/url")
-    public BusinessResponse<ImageVO> uploadImageByUrl(@RequestBody ImageUploadRequest imageUploadRequest,
-                                                      HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<ImageVO> uploadImageByUrl(@RequestBody ImageUploadRequest imageUploadRequest) {
+        User loginUser = userService.getLoginUser();
         String fileUrl = imageUploadRequest.getFileUrl();
         ThrowUtils.throwIf(StrUtil.isBlank(fileUrl), BusinessCodeEnum.PARAMS_ERROR, "文件url不能为空");
         return ResultUtils.success(imageService.uploadImage(fileUrl, imageUploadRequest, loginUser));
@@ -119,13 +114,11 @@ public class ImageController {
      * 更新图片
      *
      * @param imageUpdateRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/update")
-    public BusinessResponse<Boolean> updateImage(@RequestBody @Valid ImageUpdateRequest imageUpdateRequest,
-                                                 HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<Boolean> updateImage(@RequestBody @Valid ImageUpdateRequest imageUpdateRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(imageService.updateImage(imageUpdateRequest, loginUser));
     }
 
@@ -133,13 +126,11 @@ public class ImageController {
      * 批量更新图片
      *
      * @param imageBatchUpdateRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/update/batch")
-    public BusinessResponse<Boolean> batchUpdateImage(@RequestBody @Valid ImageBatchUpdateRequest imageBatchUpdateRequest,
-                                                      HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<Boolean> batchUpdateImage(@RequestBody @Valid ImageBatchUpdateRequest imageBatchUpdateRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(imageService.batchUpdateImage(imageBatchUpdateRequest, loginUser));
     }
 
@@ -147,8 +138,8 @@ public class ImageController {
      * 根据id获取图片视图
      */
     @GetMapping("/vo/{id}")
-    public BusinessResponse<ImageVO> getImageVOById(@PathVariable long id, HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<ImageVO> getImageVOById(@PathVariable long id) {
+        User loginUser = userService.getLoginUser();
         Image image = doGetImage(id, loginUser);
         // 用户只能查询审核通过的图片
         ThrowUtils.throwIf(image.getReviewStatus() != ImageReviewStatusEnum.PASS.value,
@@ -161,13 +152,13 @@ public class ImageController {
      * 分页获取图片视图列表
      */
     @PostMapping("/page/vo")
-    public BusinessResponse<Page<ImageVO>> listImageVOByPage(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Page<ImageVO>> listImageVOByPage(@RequestBody ImageQueryRequest imageQueryRequest) {
         ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_IMAGE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
         // 校验空间查看权限
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         checkSpaceImageViewAuth(imageQueryRequest, loginUser);
         Page<Image> imagePage = doListImage(imageQueryRequest);
         // 获取封装类
@@ -178,13 +169,13 @@ public class ImageController {
      * 分页获取图片视图列表(带缓存)
      */
     @PostMapping("/page/vo/cache")
-    public BusinessResponse<Page<ImageVO>> listImageVOByPageWithCache(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Page<ImageVO>> listImageVOByPageWithCache(@RequestBody ImageQueryRequest imageQueryRequest) {
         ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_IMAGE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
         imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
         // 校验空间查看权限
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         checkSpaceImageViewAuth(imageQueryRequest, loginUser);
 
         // 1. 查询本地缓存
@@ -228,15 +219,13 @@ public class ImageController {
      * 删除图片
      *
      * @param deleteRequest
-     * @param httpServletRequest
      * @return
      */
     @DeleteMapping()
-    public BusinessResponse<Boolean> deleteImage(@RequestBody @Valid DeleteRequest deleteRequest,
-                                                 HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> deleteImage(@RequestBody @Valid DeleteRequest deleteRequest) {
         Image image = imageService.getById(deleteRequest.getId());
         ThrowUtils.throwIf(image == null, BusinessCodeEnum.NOT_FOUND_ERROR);
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(imageService.deleteImage(image, loginUser));
     }
 
@@ -257,21 +246,18 @@ public class ImageController {
      * AI 扩图
      *
      * @param imageExpandRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/expand")
-    public BusinessResponse<ImageExpandTaskCreateVO> expandImage(@RequestBody @Valid ImageExpandRequest imageExpandRequest,
-                                                                 HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<ImageExpandTaskCreateVO> expandImage(@RequestBody @Valid ImageExpandRequest imageExpandRequest) {
+        User loginUser = userService.getLoginUser();
         // 校验图片查看权限
         doGetImage(imageExpandRequest.getId(), loginUser);
         return ResultUtils.success(imageService.expandImage(imageExpandRequest));
     }
 
     @GetMapping("/expand/task/status/{taskId}")
-    public BusinessResponse<ImageExpandTaskStatusQueryVO> queryImageExpandTaskStatus(@PathVariable String taskId,
-                                                                                     HttpServletRequest httpServletRequest) {
+    public BusinessResponse<ImageExpandTaskStatusQueryVO> queryImageExpandTaskStatus(@PathVariable String taskId) {
         return ResultUtils.success(imageService.queryImageExpandTaskStatus(taskId));
     }
 
@@ -279,9 +265,9 @@ public class ImageController {
      * 管理员根据id获取图片
      */
     @GetMapping("/{id}")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Image> getImageById(@PathVariable long id, HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    @SaCheckRole(Constants.ADMIN_ROLE)
+    public BusinessResponse<Image> getImageById(@PathVariable long id) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(doGetImage(id, loginUser));
     }
 
@@ -289,8 +275,8 @@ public class ImageController {
      * 管理员分页获取图片列表
      */
     @PostMapping("/page")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Page<Image>> listImageByPage(@RequestBody ImageQueryRequest imageQueryRequest, HttpServletRequest httpServletRequest) {
+    @SaCheckRole(Constants.ADMIN_ROLE)
+    public BusinessResponse<Page<Image>> listImageByPage(@RequestBody ImageQueryRequest imageQueryRequest) {
         return ResultUtils.success(doListImage(imageQueryRequest));
     }
 
@@ -298,14 +284,12 @@ public class ImageController {
      * 管理员审核图片
      *
      * @param imageReviewRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/review")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Boolean> reviewImage(@RequestBody @Valid ImageReviewRequest imageReviewRequest,
-                                                 HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    @SaCheckRole(Constants.ADMIN_ROLE)
+    public BusinessResponse<Boolean> reviewImage(@RequestBody @Valid ImageReviewRequest imageReviewRequest) {
+        User loginUser = userService.getLoginUser();
         imageService.reviewImage(imageReviewRequest, loginUser);
         return ResultUtils.success(true);
     }
@@ -314,14 +298,12 @@ public class ImageController {
      * 管理员抓取图片
      *
      * @param imageFetchRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/fetch")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
-    public BusinessResponse<Integer> fetchImage(@RequestBody @Valid ImageFetchRequest imageFetchRequest,
-                                                HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    @SaCheckRole(Constants.ADMIN_ROLE)
+    public BusinessResponse<Integer> fetchImage(@RequestBody @Valid ImageFetchRequest imageFetchRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(imageService.fetchImage(imageFetchRequest, loginUser));
     }
 

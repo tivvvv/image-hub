@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Slf4j
@@ -32,13 +31,11 @@ public class SpaceAnalysisController {
      * 分析空间使用情况
      *
      * @param spaceUsageAnalysisRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/usage")
-    public BusinessResponse<SpaceUsageAnalysisVO> analyzeSpaceUsage(@RequestBody SpaceUsageAnalysisRequest spaceUsageAnalysisRequest,
-                                                                    HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<SpaceUsageAnalysisVO> analyzeSpaceUsage(@RequestBody SpaceUsageAnalysisRequest spaceUsageAnalysisRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(spaceAnalysisService.analyzeSpaceUsage(spaceUsageAnalysisRequest, loginUser));
     }
 
@@ -46,13 +43,11 @@ public class SpaceAnalysisController {
      * 分析空间图片分类情况
      *
      * @param spaceImageCategoryAnalysisRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/image/category")
-    public BusinessResponse<List<SpaceImageCategoryAnalysisVO>> analyzeSpaceImageCategory(@RequestBody SpaceImageCategoryAnalysisRequest spaceImageCategoryAnalysisRequest,
-                                                                                          HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<List<SpaceImageCategoryAnalysisVO>> analyzeSpaceImageCategory(@RequestBody SpaceImageCategoryAnalysisRequest spaceImageCategoryAnalysisRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(spaceAnalysisService.analyzeSpaceImageCategory(spaceImageCategoryAnalysisRequest, loginUser));
     }
 
@@ -60,13 +55,11 @@ public class SpaceAnalysisController {
      * 分析空间图片标签情况
      *
      * @param spaceImageTagAnalysisRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/image/tag")
-    public BusinessResponse<List<SpaceImageTagAnalysisVO>> analyzeSpaceImageTag(@RequestBody SpaceImageTagAnalysisRequest spaceImageTagAnalysisRequest,
-                                                                                HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<List<SpaceImageTagAnalysisVO>> analyzeSpaceImageTag(@RequestBody SpaceImageTagAnalysisRequest spaceImageTagAnalysisRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(spaceAnalysisService.analyzeSpaceImageTag(spaceImageTagAnalysisRequest, loginUser));
     }
 
@@ -74,13 +67,11 @@ public class SpaceAnalysisController {
      * 分析空间图片大小情况
      *
      * @param spaceImageSizeAnalysisRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/image/size")
-    public BusinessResponse<List<SpaceImageSizeAnalysisVO>> analyzeSpaceImageSize(@RequestBody SpaceImageSizeAnalysisRequest spaceImageSizeAnalysisRequest,
-                                                                                  HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<List<SpaceImageSizeAnalysisVO>> analyzeSpaceImageSize(@RequestBody SpaceImageSizeAnalysisRequest spaceImageSizeAnalysisRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(spaceAnalysisService.analyzeSpaceImageSize(spaceImageSizeAnalysisRequest, loginUser));
     }
 
@@ -88,13 +79,11 @@ public class SpaceAnalysisController {
      * 分析空间上传行为情况
      *
      * @param spaceUploadBehaviorAnalysisRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/upload/behavior")
-    public BusinessResponse<List<SpaceUploadBehaviorAnalysisVO>> analyzeSpaceUploadBehavior(@RequestBody SpaceUploadBehaviorAnalysisRequest spaceUploadBehaviorAnalysisRequest,
-                                                                                            HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<List<SpaceUploadBehaviorAnalysisVO>> analyzeSpaceUploadBehavior(@RequestBody SpaceUploadBehaviorAnalysisRequest spaceUploadBehaviorAnalysisRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(spaceAnalysisService.analyzeSpaceUploadBehavior(spaceUploadBehaviorAnalysisRequest, loginUser));
     }
 

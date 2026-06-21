@@ -2,9 +2,6 @@ server:
   port: 8111
   servlet:
     context-path: /api
-    session:
-      cookie:
-        max-age: 2592000
 
 spring:
   servlet:
@@ -22,9 +19,16 @@ spring:
     timeout: 5000
   profiles:
     active: prod
-  session:
-    store-type: redis
-    timeout: 2592000
+
+sa-token:
+  token-name: satoken
+  timeout: 2592000
+  is-concurrent: true
+  is-share: true
+  token-style: uuid
+  is-read-cookie: true
+  cookie:
+    path: /
 
 mybatis-plus:
   configuration:

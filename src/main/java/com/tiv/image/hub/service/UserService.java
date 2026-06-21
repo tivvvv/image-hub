@@ -7,7 +7,6 @@ import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.LoginUserVO;
 import com.tiv.image.hub.model.vo.UserVO;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 public interface UserService extends IService<User> {
@@ -34,18 +33,16 @@ public interface UserService extends IService<User> {
      *
      * @param userAccount
      * @param userPassword
-     * @param httpServletRequest
      * @return
      */
-    LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest httpServletRequest);
+    LoginUserVO userLogin(String userAccount, String userPassword);
 
     /**
      * 获取当前登录用户
      *
-     * @param httpServletRequest
      * @return
      */
-    User getLoginUser(HttpServletRequest httpServletRequest);
+    User getLoginUser();
 
     /**
      * 获取当前登录用户视图(脱敏)
@@ -81,10 +78,8 @@ public interface UserService extends IService<User> {
 
     /**
      * 用户登出
-     *
-     * @param httpServletRequest
      */
-    void userLogout(HttpServletRequest httpServletRequest);
+    void userLogout();
 
     /**
      * 是否为管理员

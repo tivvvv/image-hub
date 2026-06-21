@@ -1,12 +1,12 @@
 package com.tiv.image.hub.service.impl;
 
+import cn.dev33.satoken.stp.StpUtil;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
-import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.mapper.UserMapper;
 import com.tiv.image.hub.model.dto.user.UserQueryRequest;
 import com.tiv.image.hub.model.entity.User;
@@ -19,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
-import javax.servlet.http.HttpServletRequest;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -64,7 +63,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public LoginUserVO userLogin(String userAccount, String userPassword, HttpServletRequest httpServletRequest) {
+    public LoginUserVO userLogin(String userAccount, String userPassword) {
 
         // 1. 校验参数
         validateParam(userAccount, userPassword);
@@ -78,26 +77,28 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         queryWrapper.eq("user_password", encryptedPassword);
         User user = this.baseMapper.selectOne(queryWrapper);
         ThrowUtils.throwIf(user == null, BusinessCodeEnum.PARAMS_ERROR, "用户不存在或者密码错误");
+        // 4. 封禁用户禁止登录
+        ThrowUtils.throwIf(UserRoleEnum.BANNED.value.equals(user.getUserRole()),
+                BusinessCodeEnum.NO_AUTH_ERROR, "账号已被封禁");
 
-        // 4. 保存用户登录态
-        httpServletRequest.getSession().setAttribute(Constants.USER_LOGIN_STATE, user);
+        // 5. 保存用户登录态
+        StpUtil.login(user.getId());
         return getLoginUserVO(user);
     }
 
     @Override
-    public User getLoginUser(HttpServletRequest httpServletRequest) {
+    public User getLoginUser() {
 
         // 1. 校验用户登录态
-        Object userObj = httpServletRequest.getSession().getAttribute(Constants.USER_LOGIN_STATE);
-        ThrowUtils.throwIf(!(userObj instanceof User), BusinessCodeEnum.NOT_LOGIN_ERROR);
-
-        User currentUser = (User) userObj;
-        Long userId = currentUser.getId();
-        ThrowUtils.throwIf(userId == null, BusinessCodeEnum.NOT_LOGIN_ERROR);
+        StpUtil.checkLogin();
 
         // 2. 从数据库查询用户
-        currentUser = this.getById(userId);
+        User currentUser = this.getById(StpUtil.getLoginIdAsLong());
         ThrowUtils.throwIf(currentUser == null, BusinessCodeEnum.NOT_LOGIN_ERROR);
+
+        // 3. 封禁用户视为无权限
+        ThrowUtils.throwIf(UserRoleEnum.BANNED.value.equals(currentUser.getUserRole()),
+                BusinessCodeEnum.NO_AUTH_ERROR, "账号已被封禁");
 
         return currentUser;
     }
@@ -148,12 +149,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public void userLogout(HttpServletRequest httpServletRequest) {
-        Object userObj = httpServletRequest.getSession().getAttribute(Constants.USER_LOGIN_STATE);
-        if (userObj == null) {
-            return;
-        }
-        httpServletRequest.getSession().removeAttribute(Constants.USER_LOGIN_STATE);
+    public void userLogout() {
+        StpUtil.logout();
     }
 
     @Override

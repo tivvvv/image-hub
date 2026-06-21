@@ -1,11 +1,12 @@
 package com.tiv.image.hub.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.qcloud.cos.model.COSObject;
 import com.qcloud.cos.model.COSObjectInputStream;
 import com.qcloud.cos.utils.IOUtils;
-import com.tiv.image.hub.annotation.AuthCheck;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
+import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.CosManager;
 import com.tiv.image.hub.util.ResultUtils;
@@ -36,7 +37,7 @@ public class FileController {
      * @return
      */
     @PostMapping("/upload")
-    @AuthCheck(mustRole = "admin")
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<String> uploadFile(@RequestPart("file") MultipartFile multipartFile) {
         String filename = multipartFile.getOriginalFilename();
         String filePath = String.format("/image-hub/%s", filename);
@@ -70,7 +71,7 @@ public class FileController {
      * @param response
      */
     @GetMapping("/download")
-    @AuthCheck(mustRole = "admin")
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public void downloadFile(@RequestParam String filePath, HttpServletResponse response) {
         COSObjectInputStream cosObjectInputStream = null;
         try {

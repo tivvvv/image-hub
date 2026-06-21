@@ -1,8 +1,8 @@
 package com.tiv.image.hub.controller;
 
+import cn.dev33.satoken.annotation.SaCheckRole;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.tiv.image.hub.annotation.AuthCheck;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.common.BusinessResponse;
 import com.tiv.image.hub.common.DeleteRequest;
@@ -24,7 +24,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Arrays;
 import java.util.List;
@@ -50,12 +49,11 @@ public class SpaceController {
      * 创建空间
      *
      * @param spaceAddRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/add")
-    public BusinessResponse<SpaceVO> addSpace(@RequestBody SpaceAddRequest spaceAddRequest, HttpServletRequest httpServletRequest) {
-        User loginUser = userService.getLoginUser(httpServletRequest);
+    public BusinessResponse<SpaceVO> addSpace(@RequestBody SpaceAddRequest spaceAddRequest) {
+        User loginUser = userService.getLoginUser();
         return ResultUtils.success(spaceService.addSpace(spaceAddRequest, loginUser));
     }
 
@@ -63,13 +61,12 @@ public class SpaceController {
      * 更新空间
      *
      * @param spaceUpdateRequest
-     * @param httpServletRequest
      * @return
      */
     @PostMapping("/update")
-    public BusinessResponse<SpaceVO> updateSpace(@RequestBody @Valid SpaceUpdateRequest spaceUpdateRequest, HttpServletRequest httpServletRequest) {
+    public BusinessResponse<SpaceVO> updateSpace(@RequestBody @Valid SpaceUpdateRequest spaceUpdateRequest) {
         Space oldSpace = spaceService.getById(spaceUpdateRequest.getId());
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         // 仅创建人或管理员可更新空间
         spaceService.checkSpaceAuth(loginUser, oldSpace);
 
@@ -114,14 +111,12 @@ public class SpaceController {
      * 删除空间
      *
      * @param deleteRequest
-     * @param httpServletRequest
      * @return
      */
     @DeleteMapping()
-    public BusinessResponse<Boolean> deleteSpace(@RequestBody @Valid DeleteRequest deleteRequest,
-                                                 HttpServletRequest httpServletRequest) {
+    public BusinessResponse<Boolean> deleteSpace(@RequestBody @Valid DeleteRequest deleteRequest) {
         Space space = spaceService.getById(deleteRequest.getId());
-        User loginUser = userService.getLoginUser(httpServletRequest);
+        User loginUser = userService.getLoginUser();
         // 仅创建人或管理员可删除
         spaceService.checkSpaceAuth(loginUser, space);
         boolean result = spaceService.removeById(deleteRequest.getId());
@@ -150,7 +145,7 @@ public class SpaceController {
      * 管理员根据id获取空间
      */
     @GetMapping("/{id}")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<Space> getSpaceById(@PathVariable long id) {
         return ResultUtils.success(doGetSpace(id));
     }
@@ -159,7 +154,7 @@ public class SpaceController {
      * 管理员分页获取空间列表
      */
     @PostMapping("/page")
-    @AuthCheck(mustRole = Constants.ADMIN_ROLE)
+    @SaCheckRole(Constants.ADMIN_ROLE)
     public BusinessResponse<Page<Space>> listSpaceByPage(@RequestBody SpaceQueryRequest spaceQueryRequest) {
         return ResultUtils.success(doListSpace(spaceQueryRequest));
     }
