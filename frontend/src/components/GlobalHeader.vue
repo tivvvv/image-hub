@@ -57,8 +57,8 @@ import { computed, h, ref } from 'vue'
 import { HomeOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { type MenuProps, message } from 'ant-design-vue'
 import { useRouter } from 'vue-router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
-import { userLogoutUsingPost } from '@/api/userController.ts'
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
+import { userLogoutUsingPost } from '@/api/userController'
 
 const loginUserStore = useLoginUserStore()
 
@@ -122,7 +122,7 @@ const doMenuClick = ({ key }: { key: string }) => {
 // 当前高亮的菜单项
 const current = ref<string[]>([])
 // 监听路由变化,更新current
-router.afterEach((to, from, next) => {
+router.afterEach((to) => {
   current.value = [to.path]
 })
 

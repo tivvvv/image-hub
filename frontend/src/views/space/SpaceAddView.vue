@@ -28,7 +28,7 @@
         , 如需升级空间, 请联系
         <a href="https://tivvvv.com" target="_blank">系统管理员</a>
       </a-typography-paragraph>
-      <a-typography-paragraph v-for="spaceLevel in spaceLevelList">
+      <a-typography-paragraph v-for="spaceLevel in spaceLevelList" :key="spaceLevel.value">
         <a-typography-text strong>{{ spaceLevel.desc }}:</a-typography-text>
         大小
         <a-typography-text strong>{{ formatSize(spaceLevel.baseMaxSize) }}</a-typography-text>
@@ -47,11 +47,11 @@ import {
   getSpaceLevelUsingGet,
   getSpaceVoByIdUsingGet,
   updateSpaceUsingPost,
-} from '@/api/spaceController.ts'
+} from '@/api/spaceController'
 import { message } from 'ant-design-vue'
 import { useRoute, useRouter } from 'vue-router'
-import { SPACE_LEVEL_OPTIONS } from '@/constants/spaceConstant.ts'
-import { formatSize } from '@/utils/imageUtil.ts'
+import { SPACE_LEVEL_OPTIONS } from '@/constants/spaceConstant'
+import { formatSize } from '@/utils/imageUtil'
 
 const loading = ref(false)
 const route = useRoute()
@@ -64,7 +64,7 @@ const spaceLevelList = ref<API.SpaceLevelVO[]>([])
  * 提交表单
  * @param values
  */
-const handleSubmit = async (values: any) => {
+const handleSubmit = async (values: API.SpaceAddRequest | API.SpaceUpdateRequest) => {
   const spaceId = spaceVO.value?.id
   loading.value = true
 

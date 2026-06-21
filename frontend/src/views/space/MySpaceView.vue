@@ -6,8 +6,8 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
-import { listSpaceVoByPageUsingPost } from '@/api/spaceController.ts'
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
+import { listSpaceVoByPageUsingPost } from '@/api/spaceController'
 import { message } from 'ant-design-vue'
 import { onMounted } from 'vue'
 

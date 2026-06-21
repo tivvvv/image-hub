@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from '@/request'
 
-/** deleteImage DELETE /api/image */
+/** 删除图片 DELETE /api/image */
 export async function deleteImageUsingDelete(
   body: API.DeleteRequest,
   options?: { [key: string]: any },
@@ -17,21 +17,7 @@ export async function deleteImageUsingDelete(
   })
 }
 
-/** getImageById GET /api/image/${param0} */
-export async function getImageByIdUsingGet(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getImageByIdUsingGETParams,
-  options?: { [key: string]: any },
-) {
-  const { id: param0, ...queryParams } = params
-  return request<API.BusinessResponseImage_>(`/api/image/${param0}`, {
-    method: 'GET',
-    params: { ...queryParams },
-    ...(options || {}),
-  })
-}
-
-/** expandImage POST /api/image/expand */
+/** 扩展图片 POST /api/image/expand */
 export async function expandImageUsingPost(
   body: API.ImageExpandRequest,
   options?: { [key: string]: any },
@@ -46,7 +32,7 @@ export async function expandImageUsingPost(
   })
 }
 
-/** queryImageExpandTaskStatus GET /api/image/expand/task/status/${param0} */
+/** 查询扩图任务状态 GET /api/image/expand/task/status/${param0} */
 export async function queryImageExpandTaskStatusUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.queryImageExpandTaskStatusUsingGETParams,
@@ -63,7 +49,7 @@ export async function queryImageExpandTaskStatusUsingGet(
   )
 }
 
-/** fetchImage POST /api/image/fetch */
+/** 抓取图片 POST /api/image/fetch */
 export async function fetchImageUsingPost(
   body: API.ImageFetchRequest,
   options?: { [key: string]: any },
@@ -78,7 +64,7 @@ export async function fetchImageUsingPost(
   })
 }
 
-/** listImageByPage POST /api/image/page */
+/** 分页获取图片 POST /api/image/page */
 export async function listImageByPageUsingPost(
   body: API.ImageQueryRequest,
   options?: { [key: string]: any },
@@ -93,7 +79,7 @@ export async function listImageByPageUsingPost(
   })
 }
 
-/** listImageVOByPage POST /api/image/page/vo */
+/** 分页获取图片视图 POST /api/image/page/vo */
 export async function listImageVoByPageUsingPost(
   body: API.ImageQueryRequest,
   options?: { [key: string]: any },
@@ -108,22 +94,7 @@ export async function listImageVoByPageUsingPost(
   })
 }
 
-/** listImageVOByPageWithCache POST /api/image/page/vo/cache */
-export async function listImageVoByPageWithCacheUsingPost(
-  body: API.ImageQueryRequest,
-  options?: { [key: string]: any },
-) {
-  return request<API.BusinessResponsePageImageVO_>('/api/image/page/vo/cache', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  })
-}
-
-/** reviewImage POST /api/image/review */
+/** 审核图片 POST /api/image/review */
 export async function reviewImageUsingPost(
   body: API.ImageReviewRequest,
   options?: { [key: string]: any },
@@ -138,7 +109,7 @@ export async function reviewImageUsingPost(
   })
 }
 
-/** listImageTagCategory GET /api/image/tagList */
+/** 获取图片标签和分类 GET /api/image/tagList */
 export async function listImageTagCategoryUsingGet(options?: { [key: string]: any }) {
   return request<API.BusinessResponseImageTagCategory_>('/api/image/tagList', {
     method: 'GET',
@@ -146,7 +117,7 @@ export async function listImageTagCategoryUsingGet(options?: { [key: string]: an
   })
 }
 
-/** updateImage POST /api/image/update */
+/** 更新图片 POST /api/image/update */
 export async function updateImageUsingPost(
   body: API.ImageUpdateRequest,
   options?: { [key: string]: any },
@@ -161,7 +132,7 @@ export async function updateImageUsingPost(
   })
 }
 
-/** batchUpdateImage POST /api/image/update/batch */
+/** 批量更新图片 POST /api/image/update/batch */
 export async function batchUpdateImageUsingPost(
   body: API.ImageBatchUpdateRequest,
   options?: { [key: string]: any },
@@ -176,7 +147,7 @@ export async function batchUpdateImageUsingPost(
   })
 }
 
-/** uploadImage POST /api/image/upload */
+/** 上传图片 POST /api/image/upload */
 export async function uploadImageUsingPost(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.uploadImageUsingPOSTParams,
@@ -219,7 +190,7 @@ export async function uploadImageUsingPost(
   })
 }
 
-/** uploadImageByUrl POST /api/image/upload/url */
+/** 通过链接上传图片 POST /api/image/upload/url */
 export async function uploadImageByUrlUsingPost(
   body: API.ImageUploadRequest,
   options?: { [key: string]: any },
@@ -234,7 +205,7 @@ export async function uploadImageByUrlUsingPost(
   })
 }
 
-/** getImageVOById GET /api/image/vo/${param0} */
+/** 根据编号获取图片视图 GET /api/image/vo/${param0} */
 export async function getImageVoByIdUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.getImageVOByIdUsingGETParams,

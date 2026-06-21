@@ -45,7 +45,7 @@
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deleteUserUsingDelete, listUserVoByPageUsingPost } from '@/api/userController.ts'
+import { deleteUserUsingDelete, listUserVoByPageUsingPost } from '@/api/userController'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 
@@ -126,7 +126,7 @@ const pagination = computed(() => {
 })
 
 // 表格变化后,重新请求获取数据
-const doTableChange = (page: any) => {
+const doTableChange = (page: { current?: number; pageSize?: number }) => {
   searchParams.current = page.current
   searchParams.pageSize = page.pageSize
   fetchData()

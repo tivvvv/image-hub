@@ -76,9 +76,9 @@
 
 <script setup lang="ts">
 import { computed, h, onMounted, ref } from 'vue'
-import { deleteImageUsingDelete, getImageVoByIdUsingGet } from '@/api/imageController.ts'
+import { deleteImageUsingDelete, getImageVoByIdUsingGet } from '@/api/imageController'
 import { message } from 'ant-design-vue'
-import { downloadImage, formatSize } from '@/utils/imageUtil.ts'
+import { downloadImage, formatSize } from '@/utils/imageUtil'
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -86,7 +86,7 @@ import {
   ShareAltOutlined,
 } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import ShareModel from '@/components/ShareModel.vue'
 
 const imageVO = ref<API.ImageVO>({})

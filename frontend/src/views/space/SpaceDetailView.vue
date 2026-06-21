@@ -51,20 +51,16 @@
 
 <script setup lang="ts">
 import { h, onMounted, ref } from 'vue'
-import { getSpaceVoByIdUsingGet } from '@/api/spaceController.ts'
+import { getSpaceVoByIdUsingGet } from '@/api/spaceController'
 import { message } from 'ant-design-vue'
-import { useRouter } from 'vue-router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
-import { listImageVoByPageUsingPost } from '@/api/imageController.ts'
-import { formatSize } from '@/utils/imageUtil.ts'
+import { listImageVoByPageUsingPost } from '@/api/imageController'
+import { formatSize } from '@/utils/imageUtil'
 import ImageList from '@/components/ImageList.vue'
 import ImageSearchForm from '@/components/ImageSearchForm.vue'
 import BatchEditImageModal from '@/components/BatchEditImageModal.vue'
 import { EditOutlined } from '@ant-design/icons-vue'
 
 const spaceVO = ref<API.SpaceVO>({})
-const router = useRouter()
-const loginUserStore = useLoginUserStore()
 const props = defineProps<Props>()
 
 interface Props {
@@ -128,7 +124,8 @@ const fetchData = async () => {
 
 // 页面加载时请求一次
 onMounted(() => {
-  ;(fetchSpaceDetail(), fetchData())
+  fetchSpaceDetail()
+  fetchData()
 })
 
 // 分页参数

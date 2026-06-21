@@ -37,9 +37,8 @@
 
 <script lang="ts" setup>
 import { ref } from 'vue'
-import { uploadImageUsingPost } from '@/api/imageController.ts'
+import { uploadImageUsingPost } from '@/api/imageController'
 import { message } from 'ant-design-vue'
-import { IMAGE_EDIT_ACTION_ENUM } from '@/constants/imageConstant.ts'
 
 interface Props {
   imageUrl?: string
@@ -57,29 +56,22 @@ const cropperRef = ref()
 // 缩放比例
 const changeScale = (num: number) => {
   cropperRef.value?.changeScale(num)
-  if (num > 0) {
-    editAction(IMAGE_EDIT_ACTION_ENUM.ZOOM_IN)
-  } else {
-    editAction(IMAGE_EDIT_ACTION_ENUM.ZOOM_OUT)
-  }
 }
 
 // 向左旋转
 const rotateLeft = () => {
   cropperRef.value.rotateLeft()
-  editAction(IMAGE_EDIT_ACTION_ENUM.ROTATE_LEFT)
 }
 
 // 向右旋转
 const rotateRight = () => {
   cropperRef.value.rotateRight()
-  editAction(IMAGE_EDIT_ACTION_ENUM.ROTATE_RIGHT)
 }
 
 // 确认裁切
 const handleConfirm = () => {
   cropperRef.value.getCropBlob((blob: Blob) => {
-    // blob 为已经裁切好的文件
+    // 裁切后的图片文件
     const fileName = (props.imageVO?.imageName || 'image') + '.png'
     const file = new File([blob], fileName, { type: blob.type })
     // 上传图片
@@ -93,10 +85,10 @@ const loading = ref(false)
  * 上传图片
  * @param file
  */
-const handleUpload = async ({ file }: any) => {
+const handleUpload = async ({ file }: { file: File }) => {
   loading.value = true
   try {
-    const params: API.ImageUploadRequest = props.imageVO ? { id: props.imageVO.id } : {}
+    const params: API.uploadImageUsingPOSTParams = props.imageVO ? { id: props.imageVO.id } : {}
     params.spaceId = props.spaceId
     const res = await uploadImageUsingPost(params, {}, file)
     if (res.data.code == 0 && res.data.data) {
@@ -137,8 +129,6 @@ defineExpose({
 
 // 可以点击编辑图片的操作按钮
 const canEdit = true
-// 编辑图片操作
-const editAction = (action: string) => {}
 </script>
 
 <style>

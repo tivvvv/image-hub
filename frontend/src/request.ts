@@ -3,14 +3,13 @@ import { message } from 'ant-design-vue'
 
 // 创建axios实例
 const myAxios: AxiosInstance = axios.create({
-  // baseURL: 'http://localhost:8111',
   baseURL: '',
   timeout: 10000,
   withCredentials: true,
 })
 
 // 请求拦截器
-axios.interceptors.request.use(
+myAxios.interceptors.request.use(
   function (config) {
     return config
   },
@@ -20,12 +19,13 @@ axios.interceptors.request.use(
 )
 
 // 响应拦截器
-axios.interceptors.response.use(
+myAxios.interceptors.response.use(
   function (response) {
     const { data } = response
     if (data.code === 40100) {
+      const responseUrl = response.request?.responseURL ?? ''
       if (
-        !response.request.responseURL.include('/user/get/login') &&
+        !responseUrl.includes('/user/login') &&
         !window.location.pathname.includes('/user/login')
       ) {
         message.warning(data.message)

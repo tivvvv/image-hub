@@ -46,12 +46,9 @@
 
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import { listImageTagCategoryUsingGet, listImageVoByPageUsingPost } from '@/api/imageController.ts'
+import { listImageTagCategoryUsingGet, listImageVoByPageUsingPost } from '@/api/imageController'
 import { message } from 'ant-design-vue'
-import { useRouter } from 'vue-router'
 import ImageList from '@/components/ImageList.vue'
-
-const router = useRouter()
 
 const dataList = ref<API.ImageVO[]>([])
 const total = ref(0)

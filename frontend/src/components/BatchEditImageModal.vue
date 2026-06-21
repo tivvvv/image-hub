@@ -36,12 +36,12 @@
 </template>
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue'
-import { batchUpdateImageUsingPost, listImageTagCategoryUsingGet } from '@/api/imageController.ts'
+import { batchUpdateImageUsingPost, listImageTagCategoryUsingGet } from '@/api/imageController'
 import { message } from 'ant-design-vue'
 
 interface Props {
   imageList: API.ImageVO[]
-  spaceId: String
+  spaceId: string
   onSuccess: () => void
 }
 
@@ -75,12 +75,12 @@ const formData = reactive<API.ImageBatchUpdateRequest>({
  * 提交表单
  * @param values
  */
-const handleSubmit = async (values: any) => {
+const handleSubmit = async (values: API.ImageBatchUpdateRequest) => {
   if (!props.imageList) {
     return
   }
   const res = await batchUpdateImageUsingPost({
-    imageIds: props.imageList.map((image) => image.id),
+    imageIds: props.imageList.map((image) => image.id).filter((id): id is number => id != null),
     spaceId: props.spaceId,
     ...values,
   })

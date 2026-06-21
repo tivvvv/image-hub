@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from '@/request'
 
-/** deleteUser DELETE /api/user */
+/** 删除用户 DELETE /api/user */
 export async function deleteUserUsingDelete(
   body: API.DeleteRequest,
   options?: { [key: string]: any },
@@ -17,33 +17,7 @@ export async function deleteUserUsingDelete(
   })
 }
 
-/** getUserById GET /api/user/${param0} */
-export async function getUserByIdUsingGet(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getUserByIdUsingGETParams,
-  options?: { [key: string]: any },
-) {
-  const { id: param0, ...queryParams } = params
-  return request<API.BusinessResponseUser_>(`/api/user/${param0}`, {
-    method: 'GET',
-    params: { ...queryParams },
-    ...(options || {}),
-  })
-}
-
-/** addUser POST /api/user/add */
-export async function addUserUsingPost(body: API.UserAddRequest, options?: { [key: string]: any }) {
-  return request<API.BusinessResponseLong_>('/api/user/add', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  })
-}
-
-/** getLoginUser GET /api/user/login */
+/** 获取登录用户 GET /api/user/login */
 export async function getLoginUserUsingGet(options?: { [key: string]: any }) {
   return request<API.BusinessResponseLoginUserVO_>('/api/user/login', {
     method: 'GET',
@@ -51,7 +25,7 @@ export async function getLoginUserUsingGet(options?: { [key: string]: any }) {
   })
 }
 
-/** userLogin POST /api/user/login */
+/** 用户登录 POST /api/user/login */
 export async function userLoginUsingPost(
   body: API.UserLoginRequest,
   options?: { [key: string]: any },
@@ -66,7 +40,7 @@ export async function userLoginUsingPost(
   })
 }
 
-/** userLogout POST /api/user/logout */
+/** 用户退出登录 POST /api/user/logout */
 export async function userLogoutUsingPost(options?: { [key: string]: any }) {
   return request<API.BusinessResponseVoid_>('/api/user/logout', {
     method: 'POST',
@@ -74,7 +48,7 @@ export async function userLogoutUsingPost(options?: { [key: string]: any }) {
   })
 }
 
-/** listUserVOByPage POST /api/user/page/vo */
+/** 分页获取用户视图 POST /api/user/page/vo */
 export async function listUserVoByPageUsingPost(
   body: API.UserQueryRequest,
   options?: { [key: string]: any },
@@ -89,7 +63,7 @@ export async function listUserVoByPageUsingPost(
   })
 }
 
-/** userRegister POST /api/user/register */
+/** 用户注册 POST /api/user/register */
 export async function userRegisterUsingPost(
   body: API.UserRegisterRequest,
   options?: { [key: string]: any },
@@ -100,35 +74,6 @@ export async function userRegisterUsingPost(
       'Content-Type': 'application/json',
     },
     data: body,
-    ...(options || {}),
-  })
-}
-
-/** updateUser POST /api/user/update */
-export async function updateUserUsingPost(
-  body: API.UserUpdateRequest,
-  options?: { [key: string]: any },
-) {
-  return request<API.BusinessResponseBoolean_>('/api/user/update', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    data: body,
-    ...(options || {}),
-  })
-}
-
-/** getUserVOById GET /api/user/vo/${param0} */
-export async function getUserVoByIdUsingGet(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getUserVOByIdUsingGETParams,
-  options?: { [key: string]: any },
-) {
-  const { id: param0, ...queryParams } = params
-  return request<API.BusinessResponseUserVO_>(`/api/user/vo/${param0}`, {
-    method: 'GET',
-    params: { ...queryParams },
     ...(options || {}),
   })
 }

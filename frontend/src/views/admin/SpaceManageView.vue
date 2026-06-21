@@ -65,11 +65,11 @@
 </template>
 <script lang="ts" setup>
 import { computed, onMounted, reactive, ref } from 'vue'
-import { deleteSpaceUsingDelete, listSpaceByPageUsingPost } from '@/api/spaceController.ts'
+import { deleteSpaceUsingDelete, listSpaceByPageUsingPost } from '@/api/spaceController'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
-import { SPACE_LEVEL_DESC, SPACE_LEVEL_OPTIONS } from '@/constants/spaceConstant.ts'
-import { formatSize } from '@/utils/imageUtil.ts'
+import { SPACE_LEVEL_DESC, SPACE_LEVEL_OPTIONS } from '@/constants/spaceConstant'
+import { formatSize } from '@/utils/imageUtil'
 
 const columns = [
   {
@@ -149,7 +149,7 @@ const pagination = computed(() => {
 })
 
 // 表格变化后,重新请求获取数据
-const doTableChange = (page: any) => {
+const doTableChange = (page: { current?: number; pageSize?: number }) => {
   searchParams.current = page.current
   searchParams.pageSize = page.pageSize
   fetchData()

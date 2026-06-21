@@ -31,8 +31,8 @@
 
 <script lang="ts" setup>
 import { reactive } from 'vue'
-import { userLoginUsingPost } from '@/api/userController.ts'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
+import { userLoginUsingPost } from '@/api/userController'
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
 import { message } from 'ant-design-vue'
 import router from '@/router'
 
@@ -50,7 +50,7 @@ const loginUserStore = useLoginUserStore()
  * 提交表单
  * @param values
  */
-const handleSubmit = async (values: any) => {
+const handleSubmit = async (values: API.UserLoginRequest) => {
   try {
     const res = await userLoginUsingPost(values)
     if (res.data.code === 0 && res.data.data) {

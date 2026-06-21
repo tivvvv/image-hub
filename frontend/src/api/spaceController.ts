@@ -2,7 +2,7 @@
 /* eslint-disable */
 import request from '@/request'
 
-/** deleteSpace DELETE /api/space */
+/** 删除空间 DELETE /api/space */
 export async function deleteSpaceUsingDelete(
   body: API.DeleteRequest,
   options?: { [key: string]: any },
@@ -17,21 +17,7 @@ export async function deleteSpaceUsingDelete(
   })
 }
 
-/** getSpaceById GET /api/space/${param0} */
-export async function getSpaceByIdUsingGet(
-  // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
-  params: API.getSpaceByIdUsingGETParams,
-  options?: { [key: string]: any },
-) {
-  const { id: param0, ...queryParams } = params
-  return request<API.BusinessResponseSpace_>(`/api/space/${param0}`, {
-    method: 'GET',
-    params: { ...queryParams },
-    ...(options || {}),
-  })
-}
-
-/** addSpace POST /api/space/add */
+/** 新增空间 POST /api/space/add */
 export async function addSpaceUsingPost(
   body: API.SpaceAddRequest,
   options?: { [key: string]: any },
@@ -46,7 +32,7 @@ export async function addSpaceUsingPost(
   })
 }
 
-/** getSpaceLevel GET /api/space/level */
+/** 获取空间等级 GET /api/space/level */
 export async function getSpaceLevelUsingGet(options?: { [key: string]: any }) {
   return request<API.BusinessResponseListSpaceLevelVO_>('/api/space/level', {
     method: 'GET',
@@ -54,7 +40,7 @@ export async function getSpaceLevelUsingGet(options?: { [key: string]: any }) {
   })
 }
 
-/** listSpaceByPage POST /api/space/page */
+/** 分页获取空间 POST /api/space/page */
 export async function listSpaceByPageUsingPost(
   body: API.SpaceQueryRequest,
   options?: { [key: string]: any },
@@ -69,7 +55,7 @@ export async function listSpaceByPageUsingPost(
   })
 }
 
-/** listSpaceVOByPage POST /api/space/page/vo */
+/** 分页获取空间视图 POST /api/space/page/vo */
 export async function listSpaceVoByPageUsingPost(
   body: API.SpaceQueryRequest,
   options?: { [key: string]: any },
@@ -84,7 +70,7 @@ export async function listSpaceVoByPageUsingPost(
   })
 }
 
-/** updateSpace POST /api/space/update */
+/** 更新空间 POST /api/space/update */
 export async function updateSpaceUsingPost(
   body: API.SpaceUpdateRequest,
   options?: { [key: string]: any },
@@ -99,7 +85,7 @@ export async function updateSpaceUsingPost(
   })
 }
 
-/** getSpaceVOById GET /api/space/vo/${param0} */
+/** 根据编号获取空间视图 GET /api/space/vo/${param0} */
 export async function getSpaceVoByIdUsingGet(
   // 叠加生成的Param类型 (非body参数swagger默认没有生成对象)
   params: API.getSpaceVOByIdUsingGETParams,

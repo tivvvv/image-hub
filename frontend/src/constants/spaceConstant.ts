@@ -1,13 +1,4 @@
 /**
- * 空间级别码
- */
-export const SPACE_LEVEL_CODE = {
-  COMMON: 0,
-  PRO: 1,
-  ULTRA: 2,
-} as const
-
-/**
  * 空间级别文案
  */
 export const SPACE_LEVEL_DESC: Record<number, string> = {

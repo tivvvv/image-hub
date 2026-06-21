@@ -18,7 +18,7 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
-import { uploadImageByUrlUsingPost } from '@/api/imageController.ts'
+import { uploadImageByUrlUsingPost } from '@/api/imageController'
 
 interface Props {
   image?: API.ImageVO
@@ -39,8 +39,8 @@ const handleUpload = async () => {
   try {
     const params: API.ImageUploadRequest = { fileUrl: fileUrl.value }
     params.spaceId = props.spaceId
-    if (props.image) {
-      params.id = props.image.id
+    if (props.image?.id != null) {
+      params.id = String(props.image.id)
     }
     const res = await uploadImageByUrlUsingPost(params)
     if (res.data.code == 0 && res.data.data) {

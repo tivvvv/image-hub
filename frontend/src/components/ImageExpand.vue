@@ -50,7 +50,7 @@ import {
   expandImageUsingPost,
   queryImageExpandTaskStatusUsingGet,
   uploadImageByUrlUsingPost,
-} from '@/api/imageController.ts'
+} from '@/api/imageController'
 import { EditOutlined, FullscreenOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 

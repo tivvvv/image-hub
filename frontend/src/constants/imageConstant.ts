@@ -25,10 +25,3 @@ export const PIC_REVIEW_STATUS_OPTIONS = Object.keys(PIC_REVIEW_STATUS_DESC).map
     value: key,
   }
 })
-
-export const IMAGE_EDIT_ACTION_ENUM = {
-  ZOOM_IN: 'ZOOM_IN',
-  ZOOM_OUT: 'ZOOM_OUT',
-  ROTATE_LEFT: 'ROTATE_LEFT',
-  ROTATE_RIGHT: 'ROTATE_RIGHT',
-}

@@ -19,7 +19,7 @@ interface Props {
   link?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   title: '分享图片',
   link: 'https://www.tivvvv.cn',
 })

@@ -132,14 +132,14 @@ import {
   deleteImageUsingDelete,
   listImageByPageUsingPost,
   reviewImageUsingPost,
-} from '@/api/imageController.ts'
+} from '@/api/imageController'
 import { message } from 'ant-design-vue'
 import dayjs from 'dayjs'
 import {
   PIC_REVIEW_STATUS_CODE,
   PIC_REVIEW_STATUS_DESC,
   PIC_REVIEW_STATUS_OPTIONS,
-} from '@/constants/imageConstant.ts'
+} from '@/constants/imageConstant'
 
 const columns = [
   {
@@ -241,7 +241,7 @@ const pagination = computed(() => {
 })
 
 // 表格变化后,重新请求获取数据
-const doTableChange = (page: any) => {
+const doTableChange = (page: { current?: number; pageSize?: number }) => {
   searchParams.current = page.current
   searchParams.pageSize = page.pageSize
   fetchData()

@@ -129,37 +129,37 @@ declare namespace API {
   }
 
   type downloadFileUsingGETParams = {
-    /** filePath */
+    /** 文件路径 */
     filePath: string
   }
 
   type getImageByIdUsingGETParams = {
-    /** id */
+    /** 编号 */
     id: number
   }
 
   type getImageVOByIdUsingGETParams = {
-    /** id */
+    /** 编号 */
     id: string
   }
 
   type getSpaceByIdUsingGETParams = {
-    /** id */
+    /** 编号 */
     id: number
   }
 
   type getSpaceVOByIdUsingGETParams = {
-    /** id */
+    /** 编号 */
     id: string
   }
 
   type getUserByIdUsingGETParams = {
-    /** id */
+    /** 编号 */
     id: number
   }
 
   type getUserVOByIdUsingGETParams = {
-    /** id */
+    /** 编号 */
     id: number
   }
 
@@ -190,7 +190,7 @@ declare namespace API {
 
   type ImageBatchUpdateRequest = {
     imageCategory?: string
-    imageIds?: string[]
+    imageIds?: number[]
     imageTagList?: string[]
     nameTemplate?: string
     spaceId?: string
@@ -379,7 +379,7 @@ declare namespace API {
   }
 
   type queryImageExpandTaskStatusUsingGETParams = {
-    /** taskId */
+    /** 任务编号 */
     taskId: string
   }
 

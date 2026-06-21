@@ -41,7 +41,7 @@
 
 <script lang="ts" setup>
 import { reactive } from 'vue'
-import { userRegisterUsingPost } from '@/api/userController.ts'
+import { userRegisterUsingPost } from '@/api/userController'
 import { message } from 'ant-design-vue'
 import router from '@/router'
 
@@ -58,7 +58,7 @@ const formState = reactive<API.UserRegisterRequest & { checkPassword?: string }>
  * 提交表单
  * @param values
  */
-const handleSubmit = async (values: any) => {
+const handleSubmit = async (values: API.UserRegisterRequest & { checkPassword?: string }) => {
   if (values.userPassword !== values.checkPassword) {
     message.error('两次输入的密码不一致')
     return

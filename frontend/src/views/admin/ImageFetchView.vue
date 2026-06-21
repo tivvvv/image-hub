@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import { fetchImageUsingPost } from '@/api/imageController.ts'
+import { fetchImageUsingPost } from '@/api/imageController'
 import { message } from 'ant-design-vue'
 
 const imageForm = reactive<API.ImageFetchRequest>({
@@ -50,7 +50,7 @@ const loading = ref(false)
  * 提交表单
  * @param values
  */
-const handleSubmit = async (values: any) => {
+const handleSubmit = async () => {
   loading.value = true
 
   const res = await fetchImageUsingPost({

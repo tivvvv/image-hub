@@ -44,7 +44,7 @@
 </template>
 
 <script setup lang="ts">
-import { downloadImage } from '@/utils/imageUtil.ts'
+import { downloadImage } from '@/utils/imageUtil'
 import {
   DeleteOutlined,
   DownloadOutlined,
@@ -52,7 +52,7 @@ import {
   ShareAltOutlined,
 } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
-import { deleteImageUsingDelete } from '@/api/imageController.ts'
+import { deleteImageUsingDelete } from '@/api/imageController'
 import { message } from 'ant-design-vue'
 import ShareModel from '@/components/ShareModel.vue'
 import { ref } from 'vue'
@@ -65,7 +65,7 @@ interface Props {
 
 const emit = defineEmits(['refresh'])
 const router = useRouter()
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   dataList: () => [],
   loading: false,
   showOperation: false,

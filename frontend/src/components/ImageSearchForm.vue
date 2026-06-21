@@ -32,7 +32,7 @@
       </a-form-item>
 
       <a-form-item label="日期" name="dateRange">
-        <a-range-imageker
+        <a-range-picker
           style="width: 400px"
           show-time
           v-model:value="dateRange"
@@ -94,12 +94,13 @@
 <script lang="ts" setup>
 import { onMounted, reactive, ref } from 'vue'
 import dayjs from 'dayjs'
+import type { Dayjs } from 'dayjs'
 import { message } from 'ant-design-vue'
-import { listImageTagCategoryUsingGet } from '@/api/imageController.ts'
+import { listImageTagCategoryUsingGet } from '@/api/imageController'
 import { ColorPicker } from 'vue3-colorpicker'
 import 'vue3-colorpicker/style.css'
 
-const dateRange = ref<[]>([])
+const dateRange = ref<[Dayjs, Dayjs] | []>([])
 const tagOptions = ref<{ value: string; label: string }[]>([])
 const categoryOptions = ref<{ value: string; label: string }[]>([])
 const pureColor = ref<string>('')
@@ -137,10 +138,12 @@ const rangePresets = ref([
   { label: '过去 90 天', value: [dayjs().add(-90, 'd'), dayjs()] },
 ])
 
-const onRangeChange = (dates: any[], dateStrings: string[]) => {
-  if (dates?.length >= 2) {
-    searchParams.updateTimeStart = dates[0].toDate()
-    searchParams.updateTimeEnd = dates[1].toDate()
+const onRangeChange = (dates: [Dayjs, Dayjs] | null) => {
+  const start = dates?.[0]
+  const end = dates?.[1]
+  if (start && end) {
+    searchParams.updateTimeStart = start.format('YYYY-MM-DD HH:mm:ss')
+    searchParams.updateTimeEnd = end.format('YYYY-MM-DD HH:mm:ss')
   } else {
     searchParams.updateTimeStart = undefined
     searchParams.updateTimeEnd = undefined

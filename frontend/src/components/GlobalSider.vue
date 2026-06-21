@@ -14,7 +14,7 @@
 import { h, ref } from 'vue'
 import { PictureOutlined, UserOutlined } from '@ant-design/icons-vue'
 import { useRouter } from 'vue-router'
-import { useLoginUserStore } from '@/stores/useLoginUserStore.ts'
+import { useLoginUserStore } from '@/stores/useLoginUserStore'
 
 const loginUserStore = useLoginUserStore()
 
@@ -36,7 +36,7 @@ const router = useRouter()
 // 当前要高亮的菜单项
 const current = ref<string[]>([])
 // 监听路由变化,更新高亮菜单项
-router.afterEach((to, from, next) => {
+router.afterEach((to) => {
   current.value = [to.path]
 })
 

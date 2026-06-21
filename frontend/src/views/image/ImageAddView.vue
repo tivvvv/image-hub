@@ -11,7 +11,7 @@
         <ImageUpload :image="imageVO" :spaceId="spaceId" :onSuccess="onSuccess" />
       </a-tab-pane>
       <a-tab-pane key="url" tab="URL上传" force-render>
-        <!-- URL图片上传组件 -->
+        <!-- 链接图片上传组件 -->
         <UrlImageUpload :image="imageVO" :spaceId="spaceId" :onSuccess="onSuccess" />
       </a-tab-pane>
     </a-tabs>
@@ -92,7 +92,7 @@ import {
   getImageVoByIdUsingGet,
   listImageTagCategoryUsingGet,
   updateImageUsingPost,
-} from '@/api/imageController.ts'
+} from '@/api/imageController'
 import { message } from 'ant-design-vue'
 import { useRoute, useRouter } from 'vue-router'
 import UrlImageUpload from '@/components/UrlImageUpload.vue'
@@ -115,8 +115,7 @@ const spaceId = computed(() => {
  * 提交表单
  * @param values
  */
-const handleSubmit = async (values: any) => {
-  console.log(values)
+const handleSubmit = async (values: API.ImageUpdateRequest) => {
   if (!imageVO.value) {
     return
   }
@@ -127,7 +126,6 @@ const handleSubmit = async (values: any) => {
   }
   const res = await updateImageUsingPost({
     id: imageId,
-    spaceId: spaceId.value,
     ...values,
   })
   // 操作成功
@@ -213,12 +211,12 @@ const onCropSuccess = (newImage: API.ImageVO) => {
 }
 
 const imageExpandRef = ref()
-// 打开 AI 扩图弹窗
+// 打开智能扩图弹窗
 const doImageExpand = async () => {
   imageExpandRef.value?.openModal()
 }
 
-// AI 扩图保存事件
+// 智能扩图保存事件
 const onImageOutPaintingSuccess = (newImage: API.ImageVO) => {
   imageVO.value = newImage
 }
