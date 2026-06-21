@@ -110,6 +110,8 @@ public class UserController {
         ThrowUtils.throwIf(id <= 0, BusinessCodeEnum.PARAMS_ERROR);
         User user = userService.getById(id);
         ThrowUtils.throwIf(user == null, BusinessCodeEnum.NOT_FOUND_ERROR);
+        // 隐藏密码
+        user.setUserPassword(null);
         return ResultUtils.success(user);
     }
 
@@ -121,8 +123,11 @@ public class UserController {
      */
     @GetMapping("/vo/{id}")
     public BusinessResponse<UserVO> getUserVOById(@PathVariable long id) {
-        BusinessResponse<User> response = getUserById(id);
-        User user = response.getData();
+        // 需登录
+        userService.getLoginUser();
+        User user = getUserById(id).getData();
+        // 隐藏账号
+        user.setUserAccount(null);
         return ResultUtils.success(userService.getUserVO(user));
     }
 

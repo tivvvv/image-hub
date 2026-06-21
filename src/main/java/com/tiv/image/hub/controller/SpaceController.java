@@ -90,6 +90,8 @@ public class SpaceController {
      */
     @GetMapping("/vo/{id}")
     public BusinessResponse<SpaceVO> getSpaceVOById(@PathVariable long id) {
+        // 需登录
+        userService.getLoginUser();
         Space space = doGetSpace(id);
         // 获取封装类
         return ResultUtils.success(spaceService.getSpaceVO(space));
@@ -100,6 +102,8 @@ public class SpaceController {
      */
     @PostMapping("/page/vo")
     public BusinessResponse<Page<SpaceVO>> listSpaceVOByPage(@RequestBody SpaceQueryRequest spaceQueryRequest) {
+        // 需登录
+        userService.getLoginUser();
         ThrowUtils.throwIf(spaceQueryRequest.getPageSize() > USER_QUERY_SPACE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         Page<Space> spacePage = doListSpace(spaceQueryRequest);
