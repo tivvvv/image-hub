@@ -83,11 +83,11 @@ public class SpaceUserAuthManager {
         }
         // 系统管理员拥有全部权限
         if (userService.isAdmin(loginUser)) {
-            return getPermissionsByRole(SpaceRoleEnum.ADMIN.value);
+            return getPermissionsByRole(SpaceRoleEnum.ADMIN.getValue());
         }
         // 公共图库,普通用户仅可查看
         if (space == null) {
-            return getPermissionsByRole(SpaceRoleEnum.VIEWER.value);
+            return getPermissionsByRole(SpaceRoleEnum.VIEWER.getValue());
         }
         SpaceTypeEnum spaceTypeEnum = SpaceTypeEnum.getEnumByValue(space.getSpaceType());
         if (spaceTypeEnum == null) {
@@ -97,7 +97,7 @@ public class SpaceUserAuthManager {
             case PRIVATE:
                 // 私有空间,仅本人拥有全部权限
                 if (space.getUserId().equals(loginUser.getId())) {
-                    return getPermissionsByRole(SpaceRoleEnum.ADMIN.value);
+                    return getPermissionsByRole(SpaceRoleEnum.ADMIN.getValue());
                 }
                 return new ArrayList<>();
             case TEAM:

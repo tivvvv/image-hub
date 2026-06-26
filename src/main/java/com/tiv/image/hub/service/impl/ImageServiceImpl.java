@@ -298,7 +298,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         Image image = this.getById(imageReviewRequest.getId());
         ThrowUtils.throwIf(image == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
         // 审核状态不应重复
-        ThrowUtils.throwIf(image.getReviewStatus() == imageReviewStatusEnum.value, BusinessCodeEnum.PARAMS_ERROR, "重复审核");
+        ThrowUtils.throwIf(image.getReviewStatus() == imageReviewStatusEnum.getValue(), BusinessCodeEnum.PARAMS_ERROR, "重复审核");
 
         Image updateImage = new Image();
         BeanUtil.copyProperties(imageReviewRequest, updateImage);
@@ -314,12 +314,12 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     public void populateReviewParams(Image image, User loginUser) {
         if (userService.isAdmin(loginUser)) {
             // 管理员自动过审
-            image.setReviewStatus(ImageReviewStatusEnum.PASS.value);
+            image.setReviewStatus(ImageReviewStatusEnum.PASS.getValue());
             image.setReviewMessage("管理员自动过审");
             image.setReviewerId(loginUser.getId());
             image.setReviewTime(new Date());
         } else {
-            image.setReviewStatus(ImageReviewStatusEnum.REVIEWING.value);
+            image.setReviewStatus(ImageReviewStatusEnum.REVIEWING.getValue());
         }
     }
 

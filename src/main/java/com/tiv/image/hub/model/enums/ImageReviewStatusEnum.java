@@ -1,10 +1,12 @@
 package com.tiv.image.hub.model.enums;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 图片审核状态枚举
  */
+@Getter
 @AllArgsConstructor
 public enum ImageReviewStatusEnum {
 
@@ -12,16 +14,16 @@ public enum ImageReviewStatusEnum {
     PASS(1, "通过"),
     REJECT(2, "拒绝");
 
-    public final int value;
+    private final int value;
 
-    public final String desc;
+    private final String desc;
 
     public static ImageReviewStatusEnum getEnumByValue(Integer value) {
         if (value == null) {
             return null;
         }
         for (ImageReviewStatusEnum imageReviewStatusEnum : ImageReviewStatusEnum.values()) {
-            if (imageReviewStatusEnum.value == value) {
+            if (imageReviewStatusEnum.getValue() == value) {
                 return imageReviewStatusEnum;
             }
         }

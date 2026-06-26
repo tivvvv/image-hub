@@ -16,9 +16,9 @@ public enum SpaceTypeEnum {
 
     TEAM(1, "团队空间");
 
-    public final int value;
+    private final int value;
 
-    public final String desc;
+    private final String desc;
 
     /**
      * 根据 value 获取枚举
@@ -28,7 +28,7 @@ public enum SpaceTypeEnum {
             return null;
         }
         return Arrays.stream(SpaceTypeEnum.values())
-                .filter(spaceLevelEnum -> spaceLevelEnum.value == value)
+                .filter(spaceTypeEnum -> spaceTypeEnum.getValue() == value)
                 .findFirst()
                 .orElse(null);
     }

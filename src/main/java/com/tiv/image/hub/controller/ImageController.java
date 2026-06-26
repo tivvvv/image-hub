@@ -142,7 +142,7 @@ public class ImageController {
         User loginUser = userService.getLoginUser();
         Image image = doGetImage(id, loginUser);
         // 用户只能查询审核通过的图片
-        ThrowUtils.throwIf(image.getReviewStatus() != ImageReviewStatusEnum.PASS.value,
+        ThrowUtils.throwIf(image.getReviewStatus() != ImageReviewStatusEnum.PASS.getValue(),
                 BusinessCodeEnum.NOT_FOUND_ERROR);
         // 获取封装类
         return ResultUtils.success(imageService.getImageVO(image));
@@ -156,7 +156,7 @@ public class ImageController {
         ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_IMAGE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
-        imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
+        imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.getValue());
         // 校验空间查看权限
         User loginUser = userService.getLoginUser();
         checkSpaceImageViewAuth(imageQueryRequest, loginUser);
@@ -173,7 +173,7 @@ public class ImageController {
         ThrowUtils.throwIf(imageQueryRequest.getPageSize() > USER_QUERY_IMAGE_LIMIT,
                 BusinessCodeEnum.PARAMS_ERROR, "查询数量过多");
         // 用户只能查询审核通过的图片
-        imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.value);
+        imageQueryRequest.setReviewStatus(ImageReviewStatusEnum.PASS.getValue());
         // 校验空间查看权限
         User loginUser = userService.getLoginUser();
         checkSpaceImageViewAuth(imageQueryRequest, loginUser);

@@ -2,10 +2,12 @@ package com.tiv.image.hub.model.enums;
 
 import cn.hutool.core.util.StrUtil;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 /**
  * 用户角色枚举
  */
+@Getter
 @AllArgsConstructor
 public enum UserRoleEnum {
 
@@ -14,16 +16,16 @@ public enum UserRoleEnum {
     BANNED("banned", "封禁用户"),
     ADMIN("admin", "管理员");
 
-    public final String value;
+    private final String value;
 
-    public final String desc;
+    private final String desc;
 
     public static UserRoleEnum getEnumByValue(String value) {
         if (StrUtil.isBlank(value)) {
             return null;
         }
         for (UserRoleEnum userRoleEnum : UserRoleEnum.values()) {
-            if (userRoleEnum.value.equals(value)) {
+            if (userRoleEnum.getValue().equals(value)) {
                 return userRoleEnum;
             }
         }

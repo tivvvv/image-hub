@@ -18,9 +18,9 @@ public enum SpaceRoleEnum {
 
     ADMIN("admin", "管理员");
 
-    public final String value;
+    private final String value;
 
-    public final String desc;
+    private final String desc;
 
     /**
      * 根据 value 获取枚举
@@ -30,7 +30,7 @@ public enum SpaceRoleEnum {
             return null;
         }
         return Arrays.stream(SpaceRoleEnum.values())
-                .filter(spaceLevelEnum -> spaceLevelEnum.value.equals(value))
+                .filter(spaceRoleEnum -> spaceRoleEnum.getValue().equals(value))
                 .findFirst()
                 .orElse(null);
     }

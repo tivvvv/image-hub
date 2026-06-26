@@ -55,7 +55,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 .userAccount(userAccount)
                 .userPassword(encryptedPassword)
                 .userName("无名")
-                .userRole(UserRoleEnum.USER.value)
+                .userRole(UserRoleEnum.USER.getValue())
                 .build();
         boolean saveResult = this.save(user);
         ThrowUtils.throwIf(!saveResult, BusinessCodeEnum.SYSTEM_ERROR, "注册失败");
@@ -78,7 +78,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         User user = this.baseMapper.selectOne(queryWrapper);
         ThrowUtils.throwIf(user == null, BusinessCodeEnum.PARAMS_ERROR, "用户不存在或者密码错误");
         // 4. 封禁用户禁止登录
-        ThrowUtils.throwIf(UserRoleEnum.BANNED.value.equals(user.getUserRole()),
+        ThrowUtils.throwIf(UserRoleEnum.BANNED.getValue().equals(user.getUserRole()),
                 BusinessCodeEnum.NO_AUTH_ERROR, "账号已被封禁");
 
         // 5. 保存用户登录态
@@ -97,7 +97,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         ThrowUtils.throwIf(currentUser == null, BusinessCodeEnum.NOT_LOGIN_ERROR);
 
         // 3. 封禁用户视为无权限
-        ThrowUtils.throwIf(UserRoleEnum.BANNED.value.equals(currentUser.getUserRole()),
+        ThrowUtils.throwIf(UserRoleEnum.BANNED.getValue().equals(currentUser.getUserRole()),
                 BusinessCodeEnum.NO_AUTH_ERROR, "账号已被封禁");
 
         return currentUser;
@@ -158,7 +158,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user == null) {
             return false;
         }
-        return UserRoleEnum.ADMIN.value.equals(user.getUserRole());
+        return UserRoleEnum.ADMIN.getValue().equals(user.getUserRole());
     }
 
     /**

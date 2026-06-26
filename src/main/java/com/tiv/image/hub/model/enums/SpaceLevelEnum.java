@@ -16,9 +16,9 @@ public enum SpaceLevelEnum {
     PRO(1, "专业版", 10_000L * 1024 * 1024, 10_000),
     ULTRA(2, "旗舰版", 100_000L * 1024 * 1024, 100_000);
 
-    public final int value;
+    private final int value;
 
-    public final String desc;
+    private final String desc;
 
     private final long baseMaxSize;
 
@@ -32,7 +32,7 @@ public enum SpaceLevelEnum {
             return null;
         }
         return Arrays.stream(SpaceLevelEnum.values())
-                .filter(spaceLevelEnum -> spaceLevelEnum.value == value)
+                .filter(spaceLevelEnum -> spaceLevelEnum.getValue() == value)
                 .findFirst()
                 .orElse(null);
     }
