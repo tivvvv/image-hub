@@ -12,6 +12,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
+import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.constant.SpaceUserPermissionKeys;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.manager.CosManager;
@@ -109,9 +110,21 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
     @Override
     public ImageVO uploadImage(Object inputSource, ImageUploadRequest imageUploadRequest, User loginUser) {
         Long imageId = imageUploadRequest.getId();
-        Long spaceId = imageUploadRequest.getSpaceId();
+        Long requestSpaceId = getStorageSpaceId(imageUploadRequest.getSpaceId());
 
-        if (spaceId != null) {
+        Image existedImage = null;
+        if (imageId != null) {
+            // 更新图片,需校验图片是否存在
+            existedImage = this.getById(imageId);
+            ThrowUtils.throwIf(existedImage == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
+            Long existedSpaceId = getStorageSpaceId(existedImage.getSpaceId());
+            ThrowUtils.throwIf(!Objects.equals(requestSpaceId, existedSpaceId),
+                    BusinessCodeEnum.PARAMS_ERROR, "不能修改图片所属空间");
+            checkImageAuth(existedImage, loginUser, SpaceUserPermissionKeys.IMAGE_EDIT);
+        }
+
+        Long spaceId = existedImage == null ? requestSpaceId : getStorageSpaceId(existedImage.getSpaceId());
+        if (!isPublicSpace(spaceId) && existedImage == null) {
             // 校验空间是否存在
             Space space = spaceMapper.selectById(spaceId);
             ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
@@ -122,21 +135,9 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             ThrowUtils.throwIf(space.getCurrentCount() >= space.getMaxCount(), BusinessCodeEnum.OPERATION_ERROR, "可用图片数量不足");
         }
 
-        Image existedImage = null;
-        if (imageId != null) {
-            // 更新图片,需校验图片是否存在
-            existedImage = this.getById(imageId);
-            ThrowUtils.throwIf(existedImage == null, BusinessCodeEnum.NOT_FOUND_ERROR, "图片不存在");
-            // 更新公共图库,仅创建人和系统管理员可操作
-            if (existedImage.getSpaceId() == null) {
-                ThrowUtils.throwIf(!loginUser.getId().equals(existedImage.getUserId())
-                        && !userService.isAdmin(loginUser), BusinessCodeEnum.NO_AUTH_ERROR);
-            }
-        }
-
         // 创建目录
         String uploadPathPrefix;
-        if (spaceId == null) {
+        if (isPublicSpace(spaceId)) {
             // 公共空间使用用户id作为目录
             uploadPathPrefix = String.format("public/%s", loginUser.getId());
         } else {
@@ -157,7 +158,9 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         Image image = new Image();
         BeanUtil.copyProperties(imageUploadResult, image);
         image.setUserId(loginUser.getId());
-        image.setSpaceId(spaceId);
+        if (existedImage == null) {
+            image.setSpaceId(spaceId);
+        }
 
         // 优先使用指定的图片名称
         if (StrUtil.isNotBlank(imageUploadRequest.getImageName())) {
@@ -178,7 +181,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
         transactionTemplate.execute(status -> {
             boolean result = this.saveOrUpdate(image);
             ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存图片失败");
-            if (spaceId != null) {
+            if (!isPublicSpace(spaceId)) {
                 // 更新空间已使用容量和数量
                 LambdaUpdateWrapper<Space> updateWrapper = new LambdaUpdateWrapper<>();
                 updateWrapper.eq(Space::getId, spaceId)
@@ -189,6 +192,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             }
             return true;
         });
+        image.setSpaceId(spaceId);
 
         return ImageVO.transferToVO(image);
     }
@@ -275,12 +279,13 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             );
         }
         // 处理空间
-        if (imageQueryRequest.getSpaceId() == null) {
+        Long spaceId = imageQueryRequest.getSpaceId();
+        if (isPublicSpace(spaceId)) {
             // 只查询公共空间的图片
-            queryWrapper.isNull(true, "space_id");
+            queryWrapper.and(wrapper -> wrapper.isNull("space_id").or().eq("space_id", Constants.PUBLIC_SPACE_ID));
         } else {
             // 查询指定空间
-            queryWrapper.eq("space_id", imageQueryRequest.getSpaceId());
+            queryWrapper.eq("space_id", spaceId);
         }
         queryWrapper.orderBy(StrUtil.isNotBlank(imageQueryRequest.getSortField()), "asc".equals(imageQueryRequest.getSortOrder()), imageQueryRequest.getSortField());
 
@@ -406,7 +411,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
      */
     private void checkImageAuth(Image image, User loginUser, String permission) {
         Long spaceId = image.getSpaceId();
-        if (spaceId == null) {
+        if (isPublicSpace(spaceId)) {
             // 公共图库,创建人或管理员可操作
             ThrowUtils.throwIf(!loginUser.getId().equals(image.getUserId()) && !userService.isAdmin(loginUser),
                     BusinessCodeEnum.NO_AUTH_ERROR);
@@ -426,7 +431,7 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             boolean result = removeById(image.getId());
             ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
 
-            if (image.getSpaceId() != null) {
+            if (!isPublicSpace(image.getSpaceId())) {
                 // 更新空间已使用容量和数量
                 LambdaUpdateWrapper<Space> updateWrapper = new LambdaUpdateWrapper<>();
                 updateWrapper.eq(Space::getId, image.getSpaceId())
@@ -539,6 +544,20 @@ public class ImageServiceImpl extends ServiceImpl<ImageMapper, Image> implements
             String imageName = nameTemplate.replaceAll("\\{序号}", String.valueOf(num++));
             image.setImageName(imageName);
         }
+    }
+
+    /**
+     * 获取实际入库的空间 id
+     */
+    private Long getStorageSpaceId(Long spaceId) {
+        return spaceId == null ? Constants.PUBLIC_SPACE_ID : spaceId;
+    }
+
+    /**
+     * 判断是否为公共图库
+     */
+    private boolean isPublicSpace(Long spaceId) {
+        return spaceId == null || Objects.equals(spaceId, Constants.PUBLIC_SPACE_ID);
     }
 
 }

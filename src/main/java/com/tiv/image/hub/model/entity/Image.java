@@ -106,7 +106,7 @@ public class Image implements Serializable {
     private Long userId;
 
     /**
-     * 空间id(null为公共空间)
+     * 空间id,0为公共空间
      */
     @TableField(value = "space_id")
     private Long spaceId;

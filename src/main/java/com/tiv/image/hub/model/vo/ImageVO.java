@@ -2,6 +2,7 @@ package com.tiv.image.hub.model.vo;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
+import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.model.entity.Image;
 import lombok.Data;
 
@@ -86,7 +87,7 @@ public class ImageVO implements Serializable {
     private Long userId;
 
     /**
-     * 空间id(null为公共空间)
+     * 空间id,0为公共空间
      */
     private Long spaceId;
 
@@ -121,6 +122,9 @@ public class ImageVO implements Serializable {
         BeanUtil.copyProperties(imageVO, image);
         // 类型不同的字段需要额外处理
         image.setImageTags(JSONUtil.toJsonStr(imageVO.getImageTagList()));
+        if (image.getSpaceId() == null) {
+            image.setSpaceId(Constants.PUBLIC_SPACE_ID);
+        }
         return image;
     }
 
@@ -138,6 +142,9 @@ public class ImageVO implements Serializable {
         BeanUtil.copyProperties(image, imageVO);
         // 类型不同的字段需要额外处理
         imageVO.setImageTagList(JSONUtil.toList(image.getImageTags(), String.class));
+        if (imageVO.getSpaceId() == null) {
+            imageVO.setSpaceId(Constants.PUBLIC_SPACE_ID);
+        }
         return imageVO;
     }
 

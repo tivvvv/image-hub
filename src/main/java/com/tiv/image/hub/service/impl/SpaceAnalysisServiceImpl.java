@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.tiv.image.hub.common.BusinessCodeEnum;
+import com.tiv.image.hub.constant.Constants;
 import com.tiv.image.hub.exception.BusinessException;
 import com.tiv.image.hub.model.dto.space.analysis.*;
 import com.tiv.image.hub.model.entity.Image;
@@ -217,7 +218,7 @@ public class SpaceAnalysisServiceImpl implements SpaceAnalysisService {
         // 分析公共图库
         boolean queryPublic = spaceAnalysisRequest.isAnalyzePublic();
         if (queryPublic) {
-            queryWrapper.isNull("space_id");
+            queryWrapper.and(wrapper -> wrapper.isNull("space_id").or().eq("space_id", Constants.PUBLIC_SPACE_ID));
             return;
         }
 

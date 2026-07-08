@@ -39,7 +39,7 @@ create table if not exists image
     image_color    varchar(16)                        null comment '图片主色调',
     thumbnail_url  varchar(512)                       null comment '缩略图url',
     user_id        bigint                             not null comment '创建用户id',
-    space_id       bigint                             null comment '空间id(null为公共空间)',
+    space_id       bigint   default 0                 not null comment '空间id,0为公共空间',
     review_status  int      default 0                 not null comment '审核状态 0:审核中,1:通过,2:驳回',
     review_message varchar(512)                       null comment '审核信息',
     reviewer_id    bigint                             null comment '审核人id',

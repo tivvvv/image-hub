@@ -20,7 +20,6 @@ import com.tiv.image.hub.service.UserService;
 import com.tiv.image.hub.util.ResultUtils;
 import com.tiv.image.hub.util.ThrowUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -65,24 +64,8 @@ public class SpaceController {
      */
     @PostMapping("/update")
     public BusinessResponse<SpaceVO> updateSpace(@RequestBody @Valid SpaceUpdateRequest spaceUpdateRequest) {
-        Space oldSpace = spaceService.getById(spaceUpdateRequest.getId());
         User loginUser = userService.getLoginUser();
-        // 仅创建人或管理员可更新空间
-        spaceService.checkSpaceAuth(loginUser, oldSpace);
-
-        Space space = new Space();
-        BeanUtils.copyProperties(spaceUpdateRequest, space);
-
-        // 校验图片参数
-        spaceService.validateSpace(space, false);
-
-        // 填充配额参数
-        spaceService.populateQuotaBySpaceLevel(space);
-
-        // 更新库表
-        boolean result = spaceService.updateById(space);
-        ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
-        return getSpaceVOById(spaceUpdateRequest.getId());
+        return ResultUtils.success(spaceService.updateSpace(spaceUpdateRequest, loginUser));
     }
 
     /**

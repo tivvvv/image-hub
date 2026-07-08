@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -312,7 +313,7 @@ public class ImageController {
         Image image = imageService.getById(imageId);
         ThrowUtils.throwIf(image == null, BusinessCodeEnum.NOT_FOUND_ERROR);
         Long spaceId = image.getSpaceId();
-        if (spaceId != null) {
+        if (!isPublicSpace(spaceId)) {
             // 空间图片,校验查看权限
             Space space = spaceService.getById(spaceId);
             ThrowUtils.throwIf(space == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
@@ -320,6 +321,7 @@ public class ImageController {
             ThrowUtils.throwIf(!permissions.contains(SpaceUserPermissionKeys.IMAGE_VIEW),
                     BusinessCodeEnum.NO_AUTH_ERROR);
         }
+        fillPublicSpaceId(image);
         return image;
     }
 
@@ -331,7 +333,7 @@ public class ImageController {
      */
     private void checkSpaceImageViewAuth(ImageQueryRequest imageQueryRequest, User loginUser) {
         Long spaceId = imageQueryRequest.getSpaceId();
-        if (spaceId == null) {
+        if (isPublicSpace(spaceId)) {
             return;
         }
         Space space = spaceService.getById(spaceId);
@@ -375,9 +377,27 @@ public class ImageController {
             }
             Page<Image> resultPage = new Page<>(current, size, total);
             resultPage.setRecords(sortedImageList.subList(start, end));
-            return resultPage;
+            return fillPublicSpaceId(resultPage);
         }
-        return imageService.page(new Page<>(current, size), queryWrapper);
+        return fillPublicSpaceId(imageService.page(new Page<>(current, size), queryWrapper));
+    }
+
+    /**
+     * 判断是否为公共图库
+     */
+    private boolean isPublicSpace(Long spaceId) {
+        return spaceId == null || Objects.equals(spaceId, Constants.PUBLIC_SPACE_ID);
+    }
+
+    private Page<Image> fillPublicSpaceId(Page<Image> imagePage) {
+        imagePage.getRecords().forEach(this::fillPublicSpaceId);
+        return imagePage;
+    }
+
+    private void fillPublicSpaceId(Image image) {
+        if (image != null && image.getSpaceId() == null) {
+            image.setSpaceId(Constants.PUBLIC_SPACE_ID);
+        }
     }
 
 }

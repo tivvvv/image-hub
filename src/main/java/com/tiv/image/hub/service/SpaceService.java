@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.tiv.image.hub.model.dto.space.SpaceAddRequest;
 import com.tiv.image.hub.model.dto.space.SpaceQueryRequest;
+import com.tiv.image.hub.model.dto.space.SpaceUpdateRequest;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.User;
 import com.tiv.image.hub.model.vo.SpaceVO;
@@ -27,6 +28,15 @@ public interface SpaceService extends IService<Space> {
      * @return
      */
     SpaceVO addSpace(SpaceAddRequest spaceAddRequest, User loginUser);
+
+    /**
+     * 更新空间
+     *
+     * @param spaceUpdateRequest
+     * @param loginUser
+     * @return
+     */
+    SpaceVO updateSpace(SpaceUpdateRequest spaceUpdateRequest, User loginUser);
 
     /**
      * 获取空间视图(脱敏)

@@ -14,6 +14,8 @@ public interface Constants {
 
     String DEFAULT_PASSWORD = "12345678";
 
+    long PUBLIC_SPACE_ID = 0L;
+
     long ONE_MEGA_BYTES = 1024 * 1024;
 
     List<String> VALID_IMAGE_SUFFIXES = List.of("png", "jpg", "jpeg", "gif", "webp");

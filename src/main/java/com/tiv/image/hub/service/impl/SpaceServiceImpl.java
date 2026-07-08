@@ -8,9 +8,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.tiv.image.hub.common.BusinessCodeEnum;
 import com.tiv.image.hub.exception.BusinessException;
+import com.tiv.image.hub.manager.sharding.DynamicShardingManager;
 import com.tiv.image.hub.mapper.SpaceMapper;
 import com.tiv.image.hub.model.dto.space.SpaceAddRequest;
 import com.tiv.image.hub.model.dto.space.SpaceQueryRequest;
+import com.tiv.image.hub.model.dto.space.SpaceUpdateRequest;
 import com.tiv.image.hub.model.entity.Space;
 import com.tiv.image.hub.model.entity.SpaceUser;
 import com.tiv.image.hub.model.entity.User;
@@ -43,6 +45,9 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
 
     @Resource
     private TransactionTemplate transactionTemplate;
+
+    @Resource
+    private DynamicShardingManager dynamicShardingManager;
 
     private static final int SPACE_NAME_MAX_LENGTH = 50;
 
@@ -121,10 +126,35 @@ public class SpaceServiceImpl extends ServiceImpl<SpaceMapper, Space> implements
                     result = spaceUserService.save(spaceUser);
                     ThrowUtils.throwIf(!result, BusinessCodeEnum.SYSTEM_ERROR, "保存空间成员失败");
                 }
+                boolean shardingTableCreated = dynamicShardingManager.createSpacePictureTable(space);
+                ThrowUtils.throwIf(!shardingTableCreated, BusinessCodeEnum.SYSTEM_ERROR, "创建空间分表失败");
                 return space;
             });
         }
         return SpaceVO.transferToVO(space);
+    }
+
+    @Override
+    public SpaceVO updateSpace(SpaceUpdateRequest spaceUpdateRequest, User loginUser) {
+        Space oldSpace = this.getById(spaceUpdateRequest.getId());
+        checkSpaceAuth(loginUser, oldSpace);
+
+        Space space = new Space();
+        BeanUtil.copyProperties(spaceUpdateRequest, space);
+        space.setUserId(oldSpace.getUserId());
+        space.setSpaceType(oldSpace.getSpaceType());
+        validateSpace(space, false);
+        populateQuotaBySpaceLevel(space);
+
+        return transactionTemplate.execute(status -> {
+            boolean result = this.updateById(space);
+            ThrowUtils.throwIf(!result, BusinessCodeEnum.OPERATION_ERROR);
+            Space updatedSpace = this.getById(space.getId());
+            ThrowUtils.throwIf(updatedSpace == null, BusinessCodeEnum.NOT_FOUND_ERROR, "空间不存在");
+            boolean shardingTableCreated = dynamicShardingManager.createSpacePictureTable(updatedSpace);
+            ThrowUtils.throwIf(!shardingTableCreated, BusinessCodeEnum.SYSTEM_ERROR, "创建空间分表失败");
+            return getSpaceVO(updatedSpace);
+        });
     }
 
     @Override
