@@ -15,11 +15,7 @@
           <a-progress
             type="circle"
             :size="42"
-            :percent="
-              spaceVO.maxSize
-                ? Number((((spaceVO.currentSize || 0) * 100) / spaceVO.maxSize).toFixed(1))
-                : 0
-            "
+            :percent="spaceUsagePercent"
           />
         </a-tooltip>
       </a-space>
@@ -50,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { h, onMounted, ref } from 'vue'
+import { computed, h, onMounted, ref } from 'vue'
 import { getSpaceVoByIdUsingGet } from '@/api/spaceController'
 import { message } from 'ant-design-vue'
 import { listImageVoByPageUsingPost } from '@/api/imageController'
@@ -62,6 +58,14 @@ import { EditOutlined } from '@ant-design/icons-vue'
 
 const spaceVO = ref<API.SpaceVO>({})
 const props = defineProps<Props>()
+const spaceUsagePercent = computed(() => {
+  const currentSize = Number(spaceVO.value.currentSize ?? 0)
+  const maxSize = Number(spaceVO.value.maxSize ?? 0)
+  if (!maxSize) {
+    return 0
+  }
+  return Number(((currentSize * 100) / maxSize).toFixed(1))
+})
 
 interface Props {
   id: string
@@ -115,7 +119,7 @@ const fetchData = async () => {
   if (res.data.code === 0 && res.data.data) {
     dataList.value = res.data.data.records ?? []
     // 确保 total 是数字类型
-    total.value = Number(res.data.data.total) ?? 0
+    total.value = Number(res.data.data.total ?? 0)
   } else {
     message.error(res.data.message)
   }

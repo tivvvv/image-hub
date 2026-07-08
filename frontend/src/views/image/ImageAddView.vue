@@ -1,7 +1,7 @@
 <template>
   <div id="imageAddView">
     <h2 style="margin-bottom: 16px">{{ route.query?.id ? '编辑图片' : '上传图片' }}</h2>
-    <a-typography-paragraph v-if="spaceId" type="secondary">
+    <a-typography-paragraph v-if="isSpaceImage" type="secondary">
       保存至空间: <a :href="`/space/${spaceId}`" target="_blank"> {{ spaceId }} </a>
     </a-typography-paragraph>
     <!-- 选择图片上传方式 -->
@@ -62,10 +62,10 @@
       <a-form-item name="imageCategory" label="分类">
         <a-auto-complete
           v-model:value="imageForm.imageCategory"
-          placeholder="请输入分类"
           :options="categoryOptions"
-          allow-clear
-        />
+        >
+          <a-input placeholder="请输入分类" allow-clear />
+        </a-auto-complete>
       </a-form-item>
 
       <a-form-item name="imageTagList" label="标签">
@@ -107,9 +107,18 @@ const imageForm = reactive<API.ImageUpdateRequest>({})
 const tagOptions = ref<{ value: string; label: string }[]>([])
 const categoryOptions = ref<{ value: string; label: string }[]>([])
 const uploadType = ref<'file' | 'url'>('file')
+const PUBLIC_SPACE_ID = '0'
+const normalizeSpaceId = (value?: string | null) => {
+  return value && value.trim().length > 0 ? value : PUBLIC_SPACE_ID
+}
 const spaceId = computed(() => {
-  return route.query?.spaceId as string
+  const querySpaceId = route.query?.spaceId
+  if (Array.isArray(querySpaceId)) {
+    return normalizeSpaceId(querySpaceId[0])
+  }
+  return normalizeSpaceId(querySpaceId ?? imageVO.value?.spaceId)
 })
+const isSpaceImage = computed(() => spaceId.value !== PUBLIC_SPACE_ID)
 
 /**
  * 提交表单
@@ -132,7 +141,7 @@ const handleSubmit = async (values: API.ImageUpdateRequest) => {
   if (res.data.code === 0 && res.data.data) {
     message.success('图片添加成功,请等待审核')
     // 根据空间类型跳转
-    if (spaceId.value) {
+    if (isSpaceImage.value) {
       await router.push(`/space/${spaceId.value}`)
     } else {
       await router.push('/')

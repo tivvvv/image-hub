@@ -58,6 +58,7 @@ const loading = ref(true)
 const searchParams = reactive<API.ImageQueryRequest>({
   current: 1,
   pageSize: 12,
+  spaceId: '0',
   sortField: 'create_time',
   sortOrder: 'desc',
 })
@@ -81,7 +82,7 @@ const fetchData = async () => {
   const res = await listImageVoByPageUsingPost(params)
   if (res.data.code === 0 && res.data.data) {
     dataList.value = res.data.data.records ?? []
-    total.value = Number(res.data.data.total) ?? 0
+    total.value = Number(res.data.data.total ?? 0)
   } else {
     message.error(res.data.message)
   }

@@ -6,10 +6,10 @@
         <a-form-item name="imageCategory" label="分类">
           <a-auto-complete
             v-model:value="formData.imageCategory"
-            placeholder="请输入分类"
             :options="categoryOptions"
-            allow-clear
-          />
+          >
+            <a-input placeholder="请输入分类" allow-clear />
+          </a-auto-complete>
         </a-form-item>
         <a-form-item name="imageTagList" label="标签">
           <a-select
@@ -80,7 +80,7 @@ const handleSubmit = async (values: API.ImageBatchUpdateRequest) => {
     return
   }
   const res = await batchUpdateImageUsingPost({
-    imageIds: props.imageList.map((image) => image.id).filter((id): id is number => id != null),
+    imageIds: props.imageList.map((image) => image.id).filter((id): id is string => id != null),
     spaceId: props.spaceId,
     ...values,
   })

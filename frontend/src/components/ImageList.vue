@@ -93,7 +93,7 @@ const doEdit = (imageVO: API.ImageVO, e: MouseEvent) => {
     path: '/image/add',
     query: {
       id: imageVO.id,
-      spaceId: imageVO.spaceId,
+      spaceId: imageVO.spaceId ?? '0',
     },
   })
 }

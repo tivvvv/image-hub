@@ -14,10 +14,10 @@
         <a-auto-complete
           v-model:value="searchParams.imageCategory"
           style="min-width: 180px"
-          placeholder="请输入分类"
           :options="categoryOptions"
-          allow-clear
-        />
+        >
+          <a-input placeholder="请输入分类" allow-clear />
+        </a-auto-complete>
       </a-form-item>
 
       <a-form-item name="imageTagList" label="标签">

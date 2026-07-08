@@ -76,10 +76,10 @@
           <div>宽度: {{ record.imageWidth }}</div>
           <div>高度: {{ record.imageHeight }}</div>
           <div>宽高比: {{ record.imageScale }}</div>
-          <div>大小: {{ (record.imageSize / 1024).toFixed(2) }}KB</div>
+          <div>大小: {{ (Number(record.imageSize ?? 0) / 1024).toFixed(2) }}KB</div>
         </template>
         <template v-if="column.dataIndex === 'spaceId'">
-          {{ record.spaceId ? record.spaceId : '公共空间' }}
+          {{ record.spaceId ?? '公共空间' }}
         </template>
         <!-- 审核信息 -->
         <template v-if="column.dataIndex === 'reviewInfo'">
@@ -214,11 +214,11 @@ const searchParams = reactive<API.ImageQueryRequest>({
 const fetchData = async () => {
   const res = await listImageByPageUsingPost({
     ...searchParams,
-    spaceId: undefined,
+    spaceId: '0',
   })
   if (res.data.code === 0 && res.data.data) {
     dataList.value = res.data.data.records ?? []
-    total.value = res.data.data.total ?? 0
+    total.value = Number(res.data.data.total ?? 0)
   } else {
     message.error(res.data.message)
   }

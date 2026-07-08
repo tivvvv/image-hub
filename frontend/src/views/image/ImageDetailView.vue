@@ -150,7 +150,7 @@ const doEdit = () => {
     path: '/image/add',
     query: {
       id: imageVO.value.id,
-      spaceId: imageVO.value.spaceId,
+      spaceId: imageVO.value.spaceId ?? '0',
     },
   })
 }
